@@ -40,24 +40,18 @@ check_lib_or_exit(
 
 =head1 NAME
 
-use-devel-assertos - a script to package Devel::AssertOS modules
-with your code.
+use-devel-checklib - a script to package Devel::CheckLib with your code.
 
 =head1 DESCRIPTION
 
 This script, when run in the directory in which your shiny new module
-lives, will bundle whichever Devel::AssertOS modules you ask it to
-in the C<inc> directory, and update your Makefile.PL (or Build.PL)
-appropriately.  If neither exists, it will create a Makefile.PL.
+lives, will bundle Devel::CheckLib in the C<inc> directory, and update
+your Makefile.PL (or Build.PL) appropriately.  If neither exists, it
+will create a Makefile.PL.
 
 =head1 SYNOPSIS
 
-    ./use-devel-assertos NetBSD OpenBSD FreeBSD
-
-=head1 USAGE
-
-In the example above, this will insert code to make your module
-depend on one of the specified OSes.
+    ./use-devel-checklib list of libraries
 
 =head1 WARNINGS, BUGS and FEEDBACK
 
@@ -73,11 +67,7 @@ Bug reports should be made using L<http://rt.cpan.org/> or by email.
 
 =head1 SEE ALSO
 
-L<Devel::AssertOS>
-
-L<Devel::CheckOS>
-
-L<Devel::AssertLib>
+L<Devel::CheckLib>
 
 =head1 AUTHOR
 
