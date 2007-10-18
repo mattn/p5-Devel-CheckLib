@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.1 2007/10/18 17:41:03 drhyde Exp $
+# $Id: CheckLib.pm,v 1.2 2007/10/18 21:21:02 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -51,7 +51,7 @@ It works by trying to compile this:
     int main(void) { return 0; }
 
 and linking it to the specified libraries.  If something pops out the end
-which looks executable, then the module simply returns.  If not, it dies.
+which looks executable, then we know that it worked.
 
 =head1 FUNCTIONS
 

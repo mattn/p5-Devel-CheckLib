@@ -1,0 +1,97 @@
+#!perl -w
+
+use strict;
+
+$/ = undef;
+
+use File::Copy;
+use File::Spec;
+use Devel::CheckLib;
+
+my @files = grep { -f $_ } qw(Makefile.PL Build.PL);
+push @files, 'Makefile.PL' unless(@files);
+
+my @libs = @ARGV;
+
+mkdir 'inc';
+mkdir 'inc/Devel';
+
+copy($INC{File::Spec->catfile(qw(Devel CheckLib.pm))},
+     File::Spec->catfile(qw(inc Devel CheckLib.pm)));
+
+foreach my $file (@files) {
+    open(FILE, $file) || next;
+    my $contents = <FILE>;
+    close(FILE);
+    open(FILE, ">$file") || die("Can't write $file\n");
+    print FILE q{use lib qw(inc);
+use Devel::CheckLib;
+
+# Prompt the user here for any paths and other configuration
+
+check_lib_or_exit(
+    # fill in what you prompted the user for here
+    lib => [qw(}.join(' ', @libs).q{)]
+);
+};
+    print FILE "\n\n$contents";
+    close(FILE);
+}
+
+=head1 NAME
+
+use-devel-assertos - a script to package Devel::AssertOS modules
+with your code.
+
+=head1 DESCRIPTION
+
+This script, when run in the directory in which your shiny new module
+lives, will bundle whichever Devel::AssertOS modules you ask it to
+in the C<inc> directory, and update your Makefile.PL (or Build.PL)
+appropriately.  If neither exists, it will create a Makefile.PL.
+
+=head1 SYNOPSIS
+
+    ./use-devel-assertos NetBSD OpenBSD FreeBSD
+
+=head1 USAGE
+
+In the example above, this will insert code to make your module
+depend on one of the specified OSes.
+
+=head1 WARNINGS, BUGS and FEEDBACK
+
+This script has not been thoroughly tested.  You should check by
+hand that it has done what you expected after running it.
+
+If you use Module::Build::Compat to write a Makefile.PL, then you
+will need to re-run this script whenever you have generated a new
+Makefile.PL.
+
+I welcome feedback about my code, including constructive criticism.
+Bug reports should be made using L<http://rt.cpan.org/> or by email.
+
+=head1 SEE ALSO
+
+L<Devel::AssertOS>
+
+L<Devel::CheckOS>
+
+L<Devel::AssertLib>
+
+=head1 AUTHOR
+
+David Cantrell E<lt>F<david@cantrell.org.uk>E<gt>
+
+=head1 COPYRIGHT and LICENCE
+
+Copyright 2007 David Cantrell
+
+This software is free-as-in-speech software, and may be used,
+distributed, and modified under the same conditions as perl itself.
+
+=head1 CONSPIRACY
+
+This module is also free-as-in-mason software.
+
+=cut
