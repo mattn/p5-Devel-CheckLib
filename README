@@ -1,0 +1,9 @@
+This module provides a way of checking whether a particular library is
+available, by attempting to compile a simple program and link against it.
+
+To install, do the usual dance:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
