@@ -9,3 +9,4 @@ t/found.t
 t/lib/Helper.pm
 t/not_found.t
 TODO
+bin/use-devel-checklib

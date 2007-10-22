@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.2 2007/10/18 21:21:02 drhyde Exp $
+# $Id: CheckLib.pm,v 1.3 2007/10/22 15:20:09 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -104,7 +104,7 @@ sub assert_lib {
         if $args{lib};
     @libpaths = (ref($args{libpath}) ? @{$args{libpath}} : $args{libpath}) 
         if $args{libpath};
-    my $cc = _findcc();
+    my @cc = _findcc();
     my($ch, $cfile) = File::Temp::tempfile(
         'assertlibXXXXXXXX', SUFFIX => '.c', UNLINK => 1
     );
@@ -120,13 +120,13 @@ sub assert_lib {
             my @libpath = map { 
                 q{/libpath:} . Win32::GetShortPathName($_)
             } @libpaths; 
-            @sys_cmd = ($cc, $cfile, "${lib}.lib", "/Fe$exefile", 
+            @sys_cmd = (@cc, $cfile, "${lib}.lib", "/Fe$exefile", 
                         "/link", @libpath
             );   
         }
         else {
             my @libpath = map { "-L$_" } @libpaths;
-            @sys_cmd = ($cc, $cfile,  "-o", "$exefile", "-l$lib", @libpath);
+            @sys_cmd = (@cc, $cfile,  "-o", "$exefile", "-l$lib", @libpath);
         }
         warn "# @sys_cmd\n" if $args{debug};
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
@@ -151,10 +151,11 @@ sub _cleanup_exe {
     
 sub _findcc {
     my @paths = split(/$Config{path_sep}/, $ENV{PATH});
-    return $Config{cc} if -x $Config{cc};
+    my @cc = split(/\s+/, $Config{cc});
+    return @cc if -x $cc[0];
     foreach my $path (@paths) {
-        my $compiler = File::Spec->catfile($path, $Config{cc}) . $Config{_exe};
-        return $compiler if -x $compiler;
+        my $compiler = File::Spec->catfile($path, $cc[0]) . $Config{_exe};
+        return ($compiler, @cc[1 .. $#cc]) if -x $compiler;
     }
     die("Couldn't find your C compiler\n");
 }
