@@ -38,6 +38,13 @@ check_lib_or_exit(
     close(FILE);
 }
 
+open(MANIFEST, 'MANIFEST') || warn("Couldn't read MANIFEST, will create one\n");
+my $manifest = <MANIFEST>;
+close(MANIFEST);
+open(MANIFEST, '>MANIFEST') || die("Couldn't write MANIFEST\n");
+print MANIFEST "inc/Devel/CheckLib.pm\n$manifest";
+close(MANIFEST);
+
 =head1 NAME
 
 use-devel-checklib - a script to package Devel::CheckLib with your code.

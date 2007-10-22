@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.3 2007/10/22 15:20:09 drhyde Exp $
+# $Id: CheckLib.pm,v 1.4 2007/10/22 22:23:34 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -16,6 +16,8 @@ require Exporter;
 
 # localising prevents the warningness leaking out of this module
 local $^W = 1;    # use warnings is a 5.6-ism
+
+_findcc(); # bomb out early if there's no compiler
 
 =head1 NAME
 
