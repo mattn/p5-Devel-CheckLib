@@ -7,6 +7,7 @@ $/ = undef;
 use File::Copy;
 use File::Spec;
 use Devel::CheckLib;
+use IO::CaptureOutput;
 
 my @files = grep { -f $_ } qw(Makefile.PL Build.PL);
 push @files, 'Makefile.PL' unless(@files);
@@ -15,9 +16,12 @@ my @libs = @ARGV;
 
 mkdir 'inc';
 mkdir 'inc/Devel';
+mkdir 'inc/IO';
 
 copy($INC{File::Spec->catfile(qw(Devel CheckLib.pm))},
      File::Spec->catfile(qw(inc Devel CheckLib.pm)));
+copy($INC{File::Spec->catfile(qw(IO CaptureOutput.pm))},
+     File::Spec->catfile(qw(inc IO CaptureOutput.pm)));
 
 foreach my $file (@files) {
     open(FILE, $file) || next;
@@ -42,7 +46,7 @@ open(MANIFEST, 'MANIFEST') || warn("Couldn't read MANIFEST, will create one\n");
 my $manifest = <MANIFEST>;
 close(MANIFEST);
 open(MANIFEST, '>MANIFEST') || die("Couldn't write MANIFEST\n");
-print MANIFEST "inc/Devel/CheckLib.pm\n$manifest";
+print MANIFEST "inc/Devel/CheckLib.pm\ninc/IO/CaptureOutput.pm\n$manifest";
 close(MANIFEST);
 
 =head1 NAME
