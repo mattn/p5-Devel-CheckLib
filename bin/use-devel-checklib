@@ -7,7 +7,6 @@ $/ = undef;
 use File::Copy;
 use File::Spec;
 use Devel::CheckLib;
-use IO::CaptureOutput;
 
 my @files = grep { -f $_ } qw(Makefile.PL Build.PL);
 push @files, 'Makefile.PL' unless(@files);
@@ -20,8 +19,10 @@ mkdir 'inc/IO';
 
 copy($INC{File::Spec->catfile(qw(Devel CheckLib.pm))},
      File::Spec->catfile(qw(inc Devel CheckLib.pm)));
-copy($INC{File::Spec->catfile(qw(IO CaptureOutput.pm))},
-     File::Spec->catfile(qw(inc IO CaptureOutput.pm)));
+
+# use IO::CaptureOutput;
+# copy($INC{File::Spec->catfile(qw(IO CaptureOutput.pm))},
+#      File::Spec->catfile(qw(inc IO CaptureOutput.pm)));
 
 foreach my $file (@files) {
     open(FILE, $file) || next;

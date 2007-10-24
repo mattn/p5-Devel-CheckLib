@@ -7,7 +7,6 @@ use Config;
 use Cwd;
 use Exporter;
 use IO::File;
-use IO::CaptureOutput qw(capture);
 use File::Spec::Functions qw/catfile canonpath/;
 use File::Temp qw/tempdir/;
 
@@ -20,6 +19,11 @@ use vars qw/@EXPORT @ISA/;
 );
 
 my $orig_wd = cwd;
+
+BEGIN { require Devel::CheckLib; } # for _quiet_system()
+sub _quiet_system {
+    goto &Devel::CheckLib::_quiet_system;
+}
 
 #--------------------------------------------------------------------------#
 # create_testlib( 'bazbam' )
@@ -55,9 +59,9 @@ sub _gcc_lib {
     my $ar = find_binary('ar') or return;
     my $ranlib = find_binary('ranlib') or return;
 
-    capture(sub { system("$cc -c ${libname}.c") }) and return;
-    capture(sub { system("$ar rc lib${libname}.a ${libname}.o") }) and return;
-    capture(sub { system("$ranlib lib${libname}.a") }) and return;
+    _quiet_system("$cc -c ${libname}.c") and return;
+    _quiet_system("$ar rc lib${libname}.a ${libname}.o") and return;
+    _quiet_system("$ranlib lib${libname}.a") and return;
     return -f "lib${libname}.a"
 }
 
@@ -66,8 +70,8 @@ sub _cl_lib {
     my $cc = find_compiler() or return;
     my $ar = find_binary('lib') or return;
 
-    capture(sub { system($cc, '/c',  "${libname}.c") }) and return;
-    capture(sub { system($ar, "${libname}.obj") }) and return;
+    _quiet_system($cc, '/c',  "${libname}.c") and return;
+    _quiet_system($ar, "${libname}.obj") and return;
     return -f "${libname}.lib";
 }
 

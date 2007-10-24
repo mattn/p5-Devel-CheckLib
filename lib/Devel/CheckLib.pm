@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.5 2007/10/23 13:59:37 drhyde Exp $
+# $Id: CheckLib.pm,v 1.6 2007/10/24 14:44:23 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -9,7 +9,6 @@ use Config;
 
 use File::Spec;
 use File::Temp;
-use IO::CaptureOutput;
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -132,9 +131,7 @@ sub assert_lib {
             @sys_cmd = (@cc, $cfile,  "-o", "$exefile", "-l$lib", @libpath);
         }
         warn "# @sys_cmd\n" if $args{debug};
-        my $rv = $args{debug}
-            ? system(@sys_cmd)
-            : IO::CaptureOutput::capture(sub { system(@sys_cmd); });
+        my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
         push @missing, $lib if $rv != 0 || ! -x $exefile; 
         _cleanup_exe($exefile);
     } 
@@ -163,6 +160,37 @@ sub _findcc {
         return ($compiler, @cc[1 .. $#cc]) if -x $compiler;
     }
     die("Couldn't find your C compiler\n");
+}
+
+# code substantially borrowed from IPC::Run3
+sub _quiet_system {
+    my (@cmd) = @_;
+
+    # save handles
+    local *STDOUT_SAVE;
+    local *STDERR_SAVE;
+    open STDOUT_SAVE, ">&STDOUT" or die "CheckLib: $! saving STDOUT";
+    open STDERR_SAVE, ">&STDERR" or die "CheckLib: $! saving STDERR";
+    
+    # redirect to nowhere
+    local *DEV_NULL;
+    open DEV_NULL, ">" . File::Spec->devnull 
+        or die "CheckLib: $! opening handle to null device";
+    open STDOUT, ">&" . fileno DEV_NULL
+        or die "CheckLib: $! redirecting STDOUT to null handle";
+    open STDERR, ">&" . fileno DEV_NULL
+        or die "CheckLib: $! redirecting STDERR to null handle";
+
+    # run system command
+    my $rv = system(@cmd);
+
+    # restore handles
+    open STDOUT, ">&" . fileno STDOUT_SAVE
+        or die "CheckLib: $! restoring STDOUT handle";
+    open STDERR, ">&" . fileno STDERR_SAVE
+        or die "CheckLib: $! restoring STDERR handle";
+
+    return $rv;
 }
 
 =head1 PLATFORMS SUPPORTED
