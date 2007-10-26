@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.6 2007/10/24 14:44:23 drhyde Exp $
+# $Id: CheckLib.pm,v 1.7 2007/10/26 15:31:19 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -117,7 +117,7 @@ sub assert_lib {
     for my $lib ( @libs ) {
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd;
-        if ( $Config{cc} eq 'cl' ) {
+        if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
             require Win32;
             my @libpath = map { 
                 q{/libpath:} . Win32::GetShortPathName($_)
@@ -125,8 +125,11 @@ sub assert_lib {
             @sys_cmd = (@cc, $cfile, "${lib}.lib", "/Fe$exefile", 
                         "/link", @libpath
             );   
-        }
-        else {
+        } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
+            # FIXME
+            die("Borland compiler not yet supported\n");
+        else {                                       # Unix-ish
+                                                     # (gcc, Sun, AIX at least)
             my @libpath = map { "-L$_" } @libpaths;
             @sys_cmd = (@cc, $cfile,  "-o", "$exefile", "-l$lib", @libpath);
         }
