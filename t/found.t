@@ -13,7 +13,7 @@ use Devel::CheckLib;
 
 my($debug, $stdout, $stderr) = ($ENV{DEVEL_CHECKLIB_DEBUG} || 0);
 
-# compile a test library -- if this fails, should we skip?
+# compile a test library
 my $libdir = create_testlib("bazbam");
 
 my @lib = (

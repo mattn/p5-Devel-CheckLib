@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.7 2007/10/26 15:31:19 drhyde Exp $
+# $Id: CheckLib.pm,v 1.8 2007/10/26 16:53:19 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -62,14 +62,18 @@ To avoid exporting them, C<use Devel::CheckLib ()>.
 
 =head2 assert_lib
 
-Takes parameters C<lib> and C<libpath>. 
+Takes several named parameters.
+
 The value of C<lib> must be either a string with the name of a single 
 library or a reference to an array of strings of library names.  Depending
 on the compiler found, library names will be fed to the compiler either as
 C<-l> arguments or as C<.lib> file names.  (E.g. C<-ljpeg> or C<jpeg.lib>)
 
-Likewise, C<libpath> must either be a string or an array of strings
+Likewise, C<libpath> must if provided either be a string or an array of strings
 representing additional paths to search for libraries.
+
+C<LIBS> must be a C<ExtUtils::MakeMaker>-style space-seperated list of
+libraries (each preceded by '-l') and directories (preceded by '-L').
 
 This will die with an error message if any of the libraries listed can
 not be found.  B<Note>: dying in a Makefile.PL or Build.PL may provoke
@@ -102,10 +106,20 @@ sub check_lib_or_exit {
 sub assert_lib {
     my %args = @_;
     my (@libs, @libpaths);
+
     @libs = (ref($args{lib}) ? @{$args{lib}} : $args{lib}) 
         if $args{lib};
     @libpaths = (ref($args{libpath}) ? @{$args{libpath}} : $args{libpath}) 
         if $args{libpath};
+
+    # work-a-like for Makefile.PL's "LIBS" argument
+    if(defined($args{LIBS})) {
+        foreach my $arg (split(/\s+/, $args{LIBS})) {
+            die("LIBS argument badly-formed: $arg\n") unless($arg =~ /^-l/i);
+            push @{$arg =~ /^-l/ ? \@libs : \@libpaths}, substr($arg, 2);
+        }
+    }
+
     my @cc = _findcc();
     my($ch, $cfile) = File::Temp::tempfile(
         'assertlibXXXXXXXX', SUFFIX => '.c', UNLINK => 1
@@ -128,7 +142,7 @@ sub assert_lib {
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             # FIXME
             die("Borland compiler not yet supported\n");
-        else {                                       # Unix-ish
+        } else {                                     # Unix-ish
                                                      # (gcc, Sun, AIX at least)
             my @libpath = map { "-L$_" } @libpaths;
             @sys_cmd = (@cc, $cfile,  "-o", "$exefile", "-l$lib", @libpath);
