@@ -4,12 +4,16 @@ BEGIN{ if (not $] < 5.006) { require warnings; warnings->import } }
 
 use lib 't/lib';
 use IO::CaptureOutput qw(capture);
-use Helper qw/create_testlib/;
 
 use File::Spec;
 use Test::More;
 
-use Devel::CheckLib;
+eval "use Devel::CheckLib";
+if($@ =~ /Couldn't find your C compiler/) {
+    plan skip_all => "Couldn't find your C compiler";
+} else {
+    eval "use Helper qw/create_testlib/";
+}
 
 my($debug, $stdout, $stderr) = ($ENV{DEVEL_CHECKLIB_DEBUG} || 0);
 

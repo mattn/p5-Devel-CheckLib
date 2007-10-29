@@ -5,7 +5,10 @@ BEGIN{ if (not $] < 5.006) { require warnings; warnings->import } }
 use Test::More;
 my $debug = 0;
 
-use Devel::CheckLib;
+eval "use Devel::CheckLib";
+if($@ =~ /Couldn't find your C compiler/) {
+    plan skip_all => "Couldn't find your C compiler";
+}
 
 my @lib = (
     $^O eq 'MSWin32' ? 'msvcrt' : 'm',
