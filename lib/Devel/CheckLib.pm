@@ -1,10 +1,10 @@
-# $Id: CheckLib.pm,v 1.8 2007/10/26 16:53:19 drhyde Exp $
+# $Id: CheckLib.pm,v 1.9 2007/10/29 17:24:51 drhyde Exp $
 
 package Devel::CheckLib;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.2';
+$VERSION = '0.3';
 use Config;
 
 use File::Spec;
@@ -139,11 +139,11 @@ sub assert_lib {
             @sys_cmd = (@cc, $cfile, "${lib}.lib", "/Fe$exefile", 
                         "/link", @libpath
             );   
-        } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
-            # FIXME
-            die("Borland compiler not yet supported\n");
+        # } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
+        #     die("Borland compiler not yet supported\n");
         } else {                                     # Unix-ish
-                                                     # (gcc, Sun, AIX at least)
+                                                     # gcc, Sun, AIX (gcc, cc)
+                                                     # Borland? (bcc(32)(.exe))
             my @libpath = map { "-L$_" } @libpaths;
             @sys_cmd = (@cc, $cfile,  "-o", "$exefile", "-l$lib", @libpath);
         }
@@ -215,8 +215,23 @@ sub _quiet_system {
 You must have a C compiler installed.  We check for C<$Config{cc}>,
 both literally as it is in Config.pm and also in the $PATH.
 
-Probably contains unsupportable assumptions about how to invoke the
-compilers and stuff.
+It has been tested with varying degrees on rigourousness on:
+
+=over
+
+=item gcc (on Linux, *BSD, Solaris, Cygwin)
+
+=item Sun's compiler tools on Solaris
+
+=item IBM's tools on AIX
+
+=item Microsoft's tools on Windows
+
+=item MinGW on Windows (with Strawberry Perl)
+
+=item Borland's tools on Windows
+
+=back
 
 =head1 WARNINGS, BUGS and FEEDBACK
 
@@ -224,12 +239,13 @@ This is a very early release intended primarily for feedback from
 people who have discussed it.  The interface may change and it has
 not been adequately tested.
 
-I welcome feedback about my code, including constructive criticism.
+Feedback is most welcome, including constructive criticism.
 Bug reports should be made using L<http://rt.cpan.org/> or by email.
 
-If you are feeling particularly generous you can encourage me in my
-open source endeavours by buying me something from my wishlist:
-  L<http://www.cantrell.org.uk/david/wishlist/>
+When submitting a bug report, please include the output from running:
+
+    perl -V
+    perl -MDevel::CheckLib
 
 =head1 SEE ALSO
 

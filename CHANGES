@@ -1,4 +1,10 @@
-0.3     XXXX-XX-XX      
+0.3     XXXX-XX-XX      tests now skip when they need a compiler and can't
+                          find one;
+                        Borland compiler support;
+                        added bin/use-devel-checklib script;
+                        added EU::MM-stylee LIBS support
+
 0.2     2007-10-18      better portability, more features
                         Renamed to Devel::CheckLib
+
 0.1     2007-10-14      Initial release

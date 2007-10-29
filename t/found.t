@@ -4,6 +4,7 @@ BEGIN{ if (not $] < 5.006) { require warnings; warnings->import } }
 
 use lib 't/lib';
 use IO::CaptureOutput qw(capture);
+use Config;
 
 use File::Spec;
 use Test::More;
@@ -20,10 +21,16 @@ my($debug, $stdout, $stderr) = ($ENV{DEVEL_CHECKLIB_DEBUG} || 0);
 # compile a test library
 my $libdir = create_testlib("bazbam");
 
-my @lib = (
-    $^O eq 'MSWin32' ? 'msvcrt' : 'm',
-    $^O eq 'MSWin32' ? 'kernel32' : 'c',
-);
+my @lib = 
+    $^O eq 'MSWin32'                       # if Win32 (not Cygwin) ...
+        ? (
+            $Config{cc} =~ /(^|^\w+ )bcc/
+                # FIXME - find a second Borland lib
+                ? ('cc3250', 'cc3250')     # ... Borland
+                : ('msvcrt', 'kernel32')   # ... otherwise assume Microsoft
+          )
+        : qw(m c)                          # default to Unix-style
+;
 
 # cases are strings to interpolate into the assert_lib call
 my @cases = (
