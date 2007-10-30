@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.9 2007/10/29 17:24:51 drhyde Exp $
+# $Id: CheckLib.pm,v 1.10 2007/10/30 15:12:17 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -139,11 +139,11 @@ sub assert_lib {
             @sys_cmd = (@cc, $cfile, "${lib}.lib", "/Fe$exefile", 
                         "/link", @libpath
             );   
-        # } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
-        #     die("Borland compiler not yet supported\n");
+        } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
+            my @libpath = map { "-L$_" } @libpaths;
+            @sys_cmd = (@cc, "-o$exefile", "-l$lib", @libpath, $cfile);
         } else {                                     # Unix-ish
                                                      # gcc, Sun, AIX (gcc, cc)
-                                                     # Borland? (bcc(32)(.exe))
             my @libpath = map { "-L$_" } @libpaths;
             @sys_cmd = (@cc, $cfile,  "-o", "$exefile", "-l$lib", @libpath);
         }
@@ -257,8 +257,10 @@ David Cantrell E<lt>david@cantrell.org.ukE<gt>
 
 David Golden E<lt>dagolden@cpan.orgE<gt>
 
-Thanks to the cpan-testers-discuss mailing list for prompting me to write it
-in the first place.
+Thanks to the cpan-testers-discuss mailing list for prompting us to write it
+in the first place;
+
+to Chris Williams for help with Borland support.
 
 =head1 COPYRIGHT and LICENCE
 
