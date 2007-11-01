@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.10 2007/10/30 15:12:17 drhyde Exp $
+# $Id: CheckLib.pm,v 1.11 2007/11/01 16:42:06 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -62,23 +62,55 @@ To avoid exporting them, C<use Devel::CheckLib ()>.
 
 =head2 assert_lib
 
-Takes several named parameters.
+This takes several named parameters, all of which are optional, and dies
+with an error message if any of the libraries listed can
+not be found.  B<Note>: dying in a Makefile.PL or Build.PL may provoke
+a 'FAIL' report from CPAN Testers' automated smoke testers.  Use 
+C<check_lib_or_exit> instead.
 
-The value of C<lib> must be either a string with the name of a single 
+The named parameters are:
+
+=over
+
+=item lib
+
+Must be either a string with the name of a single 
 library or a reference to an array of strings of library names.  Depending
 on the compiler found, library names will be fed to the compiler either as
 C<-l> arguments or as C<.lib> file names.  (E.g. C<-ljpeg> or C<jpeg.lib>)
 
-Likewise, C<libpath> must if provided either be a string or an array of strings
+=item libpath
+
+a string or an array of strings
 representing additional paths to search for libraries.
 
-C<LIBS> must be a C<ExtUtils::MakeMaker>-style space-seperated list of
+=item LIBS
+
+a C<ExtUtils::MakeMaker>-style space-seperated list of
 libraries (each preceded by '-l') and directories (preceded by '-L').
 
-This will die with an error message if any of the libraries listed can
-not be found.  B<Note>: dying in a Makefile.PL or Build.PL may provoke
-a 'FAIL' report from CPAN Testers' automated smoke testers.  Use 
-C<check_lib_or_exit> instead.
+=back
+
+And libraries are no use without header files, so ...
+
+=over
+
+=item header
+
+Must be either a string with the name of a single 
+header file or a reference to an array of strings of header file names.
+
+=item incpath
+
+a string or an array of strings
+representing additional paths to search for headers.
+
+=item INC
+
+a C<ExtUtils::MakeMaker>-style space-seperated list of
+incpaths, each preceded by '-I'.
+
+=back
 
 =head2 check_lib_or_exit
 
