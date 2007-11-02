@@ -1,10 +1,10 @@
-# $Id: CheckLib.pm,v 1.14 2007/11/02 18:05:51 drhyde Exp $
+# $Id: CheckLib.pm,v 1.15 2007/11/02 18:17:54 drhyde Exp $
 
 package Devel::CheckLib;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.3';
+$VERSION = '0.9';
 use Config;
 
 use File::Spec;
@@ -26,7 +26,7 @@ Devel::CheckLib - check that a library is available
 =head1 DESCRIPTION
 
 Devel::CheckLib is a perl module that checks whether a particular C
-library is available, and dies if it is not.
+library and its headers are available.
 
 =head1 SYNOPSIS
 
@@ -34,7 +34,7 @@ library is available, and dies if it is not.
     use lib qw(inc);
     use Devel::CheckLib;
 
-    check_lib_or_exit( lib => 'jpeg' );
+    check_lib_or_exit( lib => 'jpeg', header => 'jpeglib.h' );
     check_lib_or_exit( lib => [ 'iconv', 'jpeg' ] );
   
     # or prompt for path to library and then do this:
@@ -42,18 +42,17 @@ library is available, and dies if it is not.
 
 =head1 HOW IT WORKS
 
-You pass named parameters to a function
-describing how to build and link to the library.  Currently the only
-parameter supported is 'lib', which can be a string or an arrayref of
-several libraries.  In the future, expect us to add something for
-checking that header files are available as well.
+You pass named parameters to a function, describing to it how to build
+and link to the libraries.
 
 It works by trying to compile this:
 
     int main(void) { return 0; }
 
 and linking it to the specified libraries.  If something pops out the end
-which looks executable, then we know that it worked.
+which looks executable, then we know that it worked.  That tiny program is
+built once for each library that you specify, and (without linking) once
+for each header file.
 
 =head1 FUNCTIONS
 
@@ -120,7 +119,7 @@ This is intended for use in Makefile.PL / Build.PL
 when you might want to prompt the user for various paths and
 things before checking that what they've told you is sane.
 
-If a library isn't found, it exits with an exit value of 0 to avoid
+If any library or header is missing, it exits with an exit value of 0 to avoid
 causing a CPAN Testers 'FAIL' report.  CPAN Testers should ignore this
 result -- which is what you want if an external library dependency is not
 available.
@@ -175,7 +174,7 @@ sub assert_lib {
         close($ch);
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd;
-        # FIXME: re-factor!
+        # FIXME: re-factor - almost identical code later when linking
         if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
             require Win32;
             my @libpath = map { 
@@ -292,7 +291,7 @@ It has been tested with varying degrees on rigourousness on:
 
 =over
 
-=item gcc (on Linux, *BSD, Solaris, Cygwin)
+=item gcc (on Linux, *BSD, Mac OS X, Solaris, Cygwin)
 
 =item Sun's compiler tools on Solaris
 

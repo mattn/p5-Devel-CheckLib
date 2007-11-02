@@ -1,5 +1,6 @@
-This module provides a way of checking whether a particular library is
-available, by attempting to compile a simple program and link against it.
+This module provides a way of checking whether a particular library and
+its headers are available, by attempting to compile a simple program and
+link against it.
 
 To install, do the usual dance:
 
