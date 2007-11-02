@@ -17,9 +17,9 @@ if($@ =~ /Couldn't find your C compiler/) {
 my($debug, $stdout, $stderr) = ($ENV{DEVEL_CHECKLIB_DEBUG} || 0);
 
 # cases are strings to interpolate into the assert_lib call
-my @failcases = (
-    qq{                 header => 'headerfile.h'}, # no such file
-    qq{INC => '-t/inc', header => 'headerfile.h'}  # bad syntax
+my %failcases = (
+    qq{                 header => 'headerfile.h'} => "Can't link/include",
+    qq{INC => '-t/inc', header => 'headerfile.h'} => "INC argument badly-formed"
 );
 my @passcases = (
     qq{                    header => 't/inc/headerfile.h'},
@@ -27,15 +27,16 @@ my @passcases = (
     qq{INC => '-It/inc',   header => 'headerfile.h'}
 );
 
-plan tests => scalar(@failcases) + scalar(@passcases);
+plan tests => scalar(keys %failcases) + scalar(@passcases);
 
-for my $c (@failcases) {
+for my $c (keys %failcases) {
     capture(
         sub { eval "assert_lib(debug => $debug, $c)"; },
         \$stdout,
         \$stderr
     );
-    ok($@, "$c") || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
+    ok($@ =~ /^$failcases{$c}/, "$c") ||
+        diag("$@\n\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
 }
 for my $c ( @passcases ) {
     capture(

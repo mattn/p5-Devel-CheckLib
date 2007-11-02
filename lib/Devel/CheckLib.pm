@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.11 2007/11/01 16:42:06 drhyde Exp $
+# $Id: CheckLib.pm,v 1.12 2007/11/02 17:52:10 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -137,29 +137,70 @@ sub check_lib_or_exit {
 
 sub assert_lib {
     my %args = @_;
-    my (@libs, @libpaths);
+    my (@libs, @libpaths, @headers, @incpaths);
 
+    # FIXME: these four just SCREAM "refactor" at me
     @libs = (ref($args{lib}) ? @{$args{lib}} : $args{lib}) 
         if $args{lib};
     @libpaths = (ref($args{libpath}) ? @{$args{libpath}} : $args{libpath}) 
         if $args{libpath};
+    @headers = (ref($args{header}) ? @{$args{header}} : $args{header}) 
+        if $args{header};
+    @incpaths = (ref($args{incpath}) ? @{$args{incpath}} : $args{incpath}) 
+        if $args{incpath};
 
-    # work-a-like for Makefile.PL's "LIBS" argument
+    # work-a-like for Makefile.PL's LIBS and INC arguments
     if(defined($args{LIBS})) {
         foreach my $arg (split(/\s+/, $args{LIBS})) {
             die("LIBS argument badly-formed: $arg\n") unless($arg =~ /^-l/i);
             push @{$arg =~ /^-l/ ? \@libs : \@libpaths}, substr($arg, 2);
         }
     }
+    if(defined($args{INC})) {
+        foreach my $arg (split(/\s+/, $args{INC})) {
+            die("INC argument badly-formed: $arg\n") unless($arg =~ /^-I/);
+            push @incpaths, substr($arg, 2);
+        }
+    }
 
     my @cc = _findcc();
+    my @missing;
+
+    # first figure out which headers we can't find ...
+    for my $header (@headers) {
+        my($ch, $cfile) = File::Temp::tempfile(
+            'assertlibXXXXXXXX', SUFFIX => '.c'
+        );
+        print $ch qq{#include <$header>\nint main(void) { return 0; }\n};
+        close($ch);
+        my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
+        my @sys_cmd;
+        # FIXME: re-factor!
+        if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
+            require Win32;
+            my @libpath = map { 
+                q{/libpath:} . Win32::GetShortPathName($_)
+            } @libpaths; 
+            @sys_cmd = (@cc, $cfile, "/Fe$exefile");   # + ("/link", @libpath)?
+        } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
+            @sys_cmd = (@cc, "-o$exefile", $cfile);
+        } else {                                     # Unix-ish
+                                                     # gcc, Sun, AIX (gcc, cc)
+            @sys_cmd = (@cc, $cfile, (map { "-I$_" } '.', @incpaths), "-o", "$exefile");
+        }
+        warn "# @sys_cmd\n" if $args{debug};
+        my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
+        push @missing, $header if $rv != 0 || ! -x $exefile; 
+        _cleanup_exe($exefile);
+        unlink $cfile;
+    } 
+
+    # now do each library in turn with no headers
     my($ch, $cfile) = File::Temp::tempfile(
-        'assertlibXXXXXXXX', SUFFIX => '.c', UNLINK => 1
+        'assertlibXXXXXXXX', SUFFIX => '.c'
     );
     print $ch "int main(void) { return 0; }\n";
     close($ch);
-
-    my @missing;
     for my $lib ( @libs ) {
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd;
@@ -184,10 +225,10 @@ sub assert_lib {
         push @missing, $lib if $rv != 0 || ! -x $exefile; 
         _cleanup_exe($exefile);
     } 
-
     unlink $cfile;
+
     my $miss_string = join( q{, }, map { qq{'$_'} } @missing );
-    die("Can't build and link to $miss_string\n") if @missing;
+    die("Can't link/include $miss_string\n") if @missing;
 }
 
 sub _cleanup_exe {
