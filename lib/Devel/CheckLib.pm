@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.12 2007/11/02 17:52:10 drhyde Exp $
+# $Id: CheckLib.pm,v 1.13 2007/11/02 18:01:07 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -183,7 +183,7 @@ sub assert_lib {
             } @libpaths; 
             @sys_cmd = (@cc, $cfile, "/Fe$exefile");   # + ("/link", @libpath)?
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
-            @sys_cmd = (@cc, "-o$exefile", $cfile);
+            @sys_cmd = (@cc, (map { "-I$_" } '.', @incpaths), "-o$exefile", $cfile);
         } else {                                     # Unix-ish
                                                      # gcc, Sun, AIX (gcc, cc)
             @sys_cmd = (@cc, $cfile, (map { "-I$_" } '.', @incpaths), "-o", "$exefile");
