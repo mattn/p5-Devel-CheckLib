@@ -18,13 +18,13 @@ my($debug, $stdout, $stderr) = ($ENV{DEVEL_CHECKLIB_DEBUG} || 0);
 
 # cases are strings to interpolate into the assert_lib call
 my %failcases = (
-    qq{                 header => 'headerfile.h'} => "Can't link/include",
+    qq{incpath => '.',  header => 'headerfile.h'} => "Can't link/include",
     qq{INC => '-t/inc', header => 'headerfile.h'} => "INC argument badly-formed"
 );
 my @passcases = (
-    qq{                    header => 't/inc/headerfile.h'},
-    qq{incpath => 't/inc', header => 'headerfile.h'},
-    qq{INC => '-It/inc',   header => 'headerfile.h'}
+    qq{incpath => '.',         header => 't/inc/headerfile.h'},
+    qq{incpath => [qw(t/inc)], header => 'headerfile.h'},
+    qq{INC => '-I. -It/inc',   header => 'headerfile.h'}
 );
 
 plan tests => scalar(keys %failcases) + scalar(@passcases);
