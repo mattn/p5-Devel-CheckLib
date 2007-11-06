@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.15 2007/11/02 18:17:54 drhyde Exp $
+# $Id: CheckLib.pm,v 1.16 2007/11/06 20:11:47 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -177,10 +177,10 @@ sub assert_lib {
         # FIXME: re-factor - almost identical code later when linking
         if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
             require Win32;
-            my @libpath = map { 
-                q{/libpath:} . Win32::GetShortPathName($_)
-            } @libpaths; 
-            @sys_cmd = (@cc, $cfile, "/Fe$exefile");   # + ("/link", @libpath)?
+            my @incpaths = map { 
+                q{/I} . Win32::GetShortPathName($_)
+            } @incpaths; 
+            @sys_cmd = (@cc, $cfile, "/Fe$exefile", (map { '-I'.Win32::GetShortPathName($_) } @incpaths));
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             @sys_cmd = (@cc, (map { "-I$_" } @incpaths), "-o$exefile", $cfile);
         } else {                                     # Unix-ish
