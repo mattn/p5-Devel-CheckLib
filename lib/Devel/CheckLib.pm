@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.17 2007/11/06 20:14:53 drhyde Exp $
+# $Id: CheckLib.pm,v 1.18 2007/11/07 21:20:21 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -207,7 +207,8 @@ sub assert_lib {
             } @libpaths; 
             @sys_cmd = (@cc, $cfile, "${lib}.lib", "/Fe$exefile", 
                         "/link", @libpath
-            );   
+            );
+        } elsif($Config{cc} eq 'CC/DECC') {          # VMS
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             my @libpath = map { "-L$_" } @libpaths;
             @sys_cmd = (@cc, "-o$exefile", "-l$lib", @libpath, $cfile);
