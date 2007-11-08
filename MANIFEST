@@ -16,3 +16,4 @@ t/lib/IO/CaptureOutput.pm
 t/dash-l-libs.t
 t/headers.t
 t/inc/headerfile.h
+VMS-notes
