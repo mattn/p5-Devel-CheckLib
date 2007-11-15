@@ -36,7 +36,7 @@ sub _quiet_system {
 sub create_testlib {
     my ($libname) = (@_);
     return unless $libname;
-    my $tempdir = tempdir(TEMPLATE => "Devel-Assert-testlib-XXXXXXXX");
+    my $tempdir = tempdir(CLEANUP => 1, TEMPLATE => "Devel-Assert-testlib-XXXXXXXX");
     chdir $tempdir;
     my $code_fh = IO::File->new("${libname}.c", ">");
     print {$code_fh} "int foo() { return 0; }\n";
