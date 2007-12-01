@@ -63,7 +63,7 @@ will create a Makefile.PL.
 
 =head1 SYNOPSIS
 
-    ./use-devel-checklib list of libraries
+    use-devel-checklib list of libraries
 
 =head1 WARNINGS, BUGS and FEEDBACK
 
