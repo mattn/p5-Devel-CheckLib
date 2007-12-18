@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.18 2007/11/07 21:20:21 drhyde Exp $
+# $Id: CheckLib.pm,v 1.19 2007/12/18 13:45:26 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -320,6 +320,8 @@ When submitting a bug report, please include the output from running:
 =head1 SEE ALSO
 
 L<Devel::CheckOS>
+
+L<Probe::Perl>
 
 =head1 AUTHORS
 
