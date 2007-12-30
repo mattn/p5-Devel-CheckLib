@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.19 2007/12/18 13:45:26 drhyde Exp $
+# $Id: CheckLib.pm,v 1.20 2007/12/30 18:07:21 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -315,7 +315,7 @@ Bug reports should be made using L<http://rt.cpan.org/> or by email.
 When submitting a bug report, please include the output from running:
 
     perl -V
-    perl -MDevel::CheckLib
+    perl -MDevel::CheckLib -e0
 
 =head1 SEE ALSO
 
