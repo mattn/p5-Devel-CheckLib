@@ -1,10 +1,9 @@
-# $Id: multi-word-compiler.t,v 1.2 2007/10/23 13:17:12 drhyde Exp $
+# $Id: multi-word-compiler.t,v 1.3 2008/02/07 14:16:39 drhyde Exp $
 
 use strict;
 BEGIN{ if (not $] < 5.006) { require warnings; warnings->import } }
 
 use Test::More;
-use File::Temp;
 
 plan tests => 1;
 

@@ -1,4 +1,4 @@
-# $Id: CaptureOutput.pm,v 1.1 2007/10/24 16:27:49 drhyde Exp $
+# $Id: CaptureOutput.pm,v 1.2 2008/02/07 14:16:39 drhyde Exp $
 package IO::CaptureOutput;
 use strict;
 use vars qw/$VERSION @ISA @EXPORT_OK %EXPORT_TAGS/;
@@ -6,7 +6,7 @@ use Exporter;
 @ISA = 'Exporter';
 @EXPORT_OK = qw/capture capture_exec qxx/;
 %EXPORT_TAGS = (all => \@EXPORT_OK);
-$VERSION = sprintf'%d.%02d', q$Revision: 1.1 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf'%d.%02d', q$Revision: 1.2 $ =~ /: (\d+)\.(\d+)/;
 
 sub capture (&@) {
     my ($code, $output, $error) = @_;
@@ -62,7 +62,7 @@ sub new {
 
     # Create replacement filehandle
     my $newio = gensym;
-    (undef, my $newio_file) = tempfile;
+    (undef, my $newio_file) = tempfile(CLEANUP => 1);
     open $newio, "+> $newio_file" or croak "Can't create temp file for $fh - $!";
 
     # Redirect

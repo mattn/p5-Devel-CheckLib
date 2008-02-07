@@ -1,10 +1,9 @@
-# $Id: bad-single-word-compiler.t,v 1.1 2007/10/22 22:23:34 drhyde Exp $
+# $Id: bad-single-word-compiler.t,v 1.2 2008/02/07 14:16:39 drhyde Exp $
 
 use strict;
 BEGIN{ if (not $] < 5.006) { require warnings; warnings->import } }
 
 use Test::More;
-use File::Temp;
 
 plan tests => 1;
 
