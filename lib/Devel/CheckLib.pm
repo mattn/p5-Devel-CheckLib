@@ -1,10 +1,10 @@
-# $Id: CheckLib.pm,v 1.20 2007/12/30 18:07:21 drhyde Exp $
+# $Id: CheckLib.pm,v 1.21 2008/03/04 21:49:20 drhyde Exp $
 
 package Devel::CheckLib;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.9';
+$VERSION = '0.4';
 use Config;
 
 use File::Spec;

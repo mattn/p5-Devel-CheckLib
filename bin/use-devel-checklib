@@ -1,5 +1,5 @@
 #!perl -w
-# $Id: use-devel-checklib,v 1.7 2008/03/03 20:39:28 drhyde Exp $
+# $Id: use-devel-checklib,v 1.8 2008/03/04 21:49:20 drhyde Exp $
 
 use strict;
 
@@ -17,8 +17,10 @@ my @libs = @ARGV;
 mkdir 'inc';
 mkdir 'inc/Devel';
 
-copy($INC{File::Spec->catfile(qw(Devel CheckLib.pm))},
+copy($INC{"Devel/CheckLib.pm"},
      File::Spec->catfile(qw(inc Devel CheckLib.pm)));
+
+print "Copied Devel::CheckLib to inc/ directory\n";
 
 foreach my $file (@files) {
     open(FILE, $file) || next;
@@ -37,6 +39,7 @@ check_lib_or_exit(
 };
     print FILE "\n\n$contents";
     close(FILE);
+    print "Updated/created $file\n";
 }
 
 open(MANIFEST, 'MANIFEST') || warn("Couldn't read MANIFEST, will create one\n");
@@ -45,6 +48,7 @@ close(MANIFEST);
 open(MANIFEST, '>MANIFEST') || die("Couldn't write MANIFEST\n");
 print MANIFEST "inc/Devel/CheckLib.pm\n$manifest";
 close(MANIFEST);
+print "Updated/created MANIFEST\n";
 
 =head1 NAME
 

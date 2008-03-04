@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.5 2007/10/24 14:44:23 drhyde Exp $
+# $Id: Makefile.PL,v 1.6 2008/03/04 21:49:19 drhyde Exp $
 
 use ExtUtils::MakeMaker;
 
@@ -11,7 +11,7 @@ WriteMakefile(
     PREREQ_PM    => {
         'Test::More'        => 0.62,  # too high? but API changed here
         'File::Temp'        => 0.16,
-        # 'IO::CaptureOutput' => 1.04   # doesn't exist yet :-)
+        'IO::CaptureOutput' => 1.0801
     },
     EXE_FILES    => [qw(
         bin/use-devel-checklib

@@ -1,5 +1,6 @@
-0.X     2007-XX-XX      Look for headers as well as libraries;
+0.4     2008-03-04      Look for headers as well as libraries;
                         Clean up temp dirs in tests;
+                        use-devel-checklib fixed for Win32
 
 0.3     2007-10-30      tests now skip when they need a compiler and can't
                           find one;
