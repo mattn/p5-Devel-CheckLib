@@ -1,3 +1,7 @@
+0.5     2008-03-12      Break up 'package Devel::CheckLib' in inc/ so
+                          distributions including it don't get marked
+                          as 'unauthorised'
+
 0.4     2008-03-04      Look for headers as well as libraries;
                         Clean up temp dirs in tests;
                         use-devel-checklib fixed for Win32
