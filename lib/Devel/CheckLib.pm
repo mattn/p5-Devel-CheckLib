@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.23 2008/05/23 19:06:04 drhyde Exp $
+# $Id: CheckLib.pm,v 1.24 2008/06/02 12:49:50 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -30,8 +30,6 @@ library and its headers are available.
 
 =head1 SYNOPSIS
 
-    # in a Makefile.PL or Build.PL
-    use lib qw(inc);
     use Devel::CheckLib;
 
     check_lib_or_exit( lib => 'jpeg', header => 'jpeglib.h' );
@@ -39,6 +37,13 @@ library and its headers are available.
   
     # or prompt for path to library and then do this:
     check_lib_or_exit( lib => 'jpeg', libpath => $additional_path );
+
+=head1 USING IT IN Makefile.PL or Build.PL
+
+If you want to use this from Makefile.PL or Build.PL, do
+not simply copy the module into your distribution as this may cause
+problems when PAUSE and search.cpan.org index the distro.  Instead, use
+the use-devel-checklib script.
 
 =head1 HOW IT WORKS
 
