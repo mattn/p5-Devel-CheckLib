@@ -1,4 +1,4 @@
-# $Id: CheckLib.pm,v 1.24 2008/06/02 12:49:50 drhyde Exp $
+# $Id: CheckLib.pm,v 1.25 2008/10/27 12:16:23 drhyde Exp $
 
 package Devel::CheckLib;
 
@@ -307,6 +307,8 @@ It has been tested with varying degrees on rigourousness on:
 =item MinGW on Windows (with Strawberry Perl)
 
 =item Borland's tools on Windows
+
+=item QNX
 
 =back
 
