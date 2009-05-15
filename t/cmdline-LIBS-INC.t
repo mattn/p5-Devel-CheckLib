@@ -19,7 +19,7 @@ if($@ =~ /Couldn't find your C compiler/) { #'
 
 eval "use Helper qw(create_testlib)";
 if($libdir = create_testlib("bazbam")) {
-    plan tests => 1;
+    plan tests => 3;
 } else {
     plan skip_all => "Couldn't build a library to test against";
 };
@@ -34,9 +34,10 @@ my $runtime = '-l'.(
         : 'm'                              # default to Unix-style
 );
 
+my $rval = undef;
 my @args = (qq{LIBS=$runtime});
 capture(
-    sub { system(
+    sub { $rval = system(
         $Config{perlpath},
 	'-Mblib',
 	'-MDevel::CheckLib',
@@ -47,11 +48,12 @@ capture(
     \$stdout,
     \$stderr
 );
-is($stderr, q{}, join(', ', @args)) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
+ok($stderr eq '' && defined($rval) && $rval == 0, "linked OK: ".join(', ', @args)) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
 
+$rval = undef;
 @args = map { "LIBS=$_" } ($runtime, '-lbazbam', "-L$libdir");
 capture(
-    sub { system(
+    sub { $rval = system(
         $Config{perlpath},
 	'-Mblib',
 	'-MDevel::CheckLib',
@@ -62,11 +64,12 @@ capture(
     \$stdout,
     \$stderr
 );
-is($stderr, q{}, join(', ', @args)) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
+ok($stderr eq '' && defined($rval) && $rval == 0, "linked OK: ".join(', ', @args)) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
 
-@args = (qq{LIBS="$runtime -lbazbam -L$libdir"});
+$rval = undef;
+@args = (qq{"LIBS=$runtime -lbazbam -L$libdir"});
 capture(
-    sub { system(
+    sub { $rval = system(
         $Config{perlpath},
 	'-Mblib',
 	'-MDevel::CheckLib',
@@ -77,4 +80,4 @@ capture(
     \$stdout,
     \$stderr
 );
-is($stderr, q{}, join(', ', @args)) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
+ok($stderr eq '' && defined($rval) && $rval == 0, "linked OK: ".join(', ', @args)) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
