@@ -1,4 +1,4 @@
-0.6     2009-XX-XX      Support EU::MM-stylee command line, thanks to
+0.6     2009-05-20      Support EU::MM-stylee command line, thanks to
                           DAXIM (see RT #46044)
 
 0.5     2008-03-12      Break up 'package Devel::CheckLib' in inc/ so
