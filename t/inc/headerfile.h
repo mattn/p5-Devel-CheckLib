@@ -1,1 +1,3 @@
-#define foo HLAGH
+int foo(void);
+int libversion(void);
+

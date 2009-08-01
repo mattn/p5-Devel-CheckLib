@@ -18,3 +18,4 @@ t/inc/headerfile.h
 VMS-notes
 t/coverage.sh
 t/cmdline-LIBS-INC.t
+t/custom-function.t

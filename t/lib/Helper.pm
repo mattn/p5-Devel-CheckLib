@@ -28,9 +28,10 @@ sub _quiet_system {
 #--------------------------------------------------------------------------#
 # create_testlib( 'bazbam' )
 #
-# takes a library name and compiles a simple library with one function, 
-# foo(), in a test directory and returns the test directory.  Returns 
-# undef if something went wrong
+# takes a library name and compiles a simple library with two functions, 
+# foo() (which returns 0) and libversion() (which returns 42), in a temp
+# directory and returns the temp directory.  Returns undef if something
+# went wrong
 #--------------------------------------------------------------------------#
 
 sub create_testlib {
@@ -39,7 +40,7 @@ sub create_testlib {
     my $tempdir = tempdir(CLEANUP => 1, TEMPLATE => "Devel-Assert-testlib-XXXXXXXX");
     chdir $tempdir;
     my $code_fh = IO::File->new("${libname}.c", ">");
-    print {$code_fh} "int foo() { return 0; }\n";
+    print {$code_fh} "int libversion() { return 42; }\nint foo() { return 0; }\n";
     $code_fh->close;
     
     my $cc = $Config{cc};
