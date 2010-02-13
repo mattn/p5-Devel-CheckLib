@@ -41,7 +41,7 @@ my @cases = (
 
 push @cases, qq{lib => 'bazbam', libpath => '$libdir'} if $libdir;
 
-plan tests => scalar @cases;
+plan tests => 2 * scalar @cases;
 
 
 for my $c ( @cases ) {
@@ -51,4 +51,5 @@ for my $c ( @cases ) {
         \$stderr
     );
     is($@, q{}, "$c") || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
+    ok(check_lib(debug => $debug, eval($c)), "... and check_lib is true");
 }

@@ -12,7 +12,7 @@ use File::Temp;
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(assert_lib check_lib_or_exit);
+@EXPORT = qw(assert_lib check_lib_or_exit check_lib);
 
 # localising prevents the warningness leaking out of this module
 local $^W = 1;    # use warnings is a 5.6-ism
@@ -150,6 +150,11 @@ causing a CPAN Testers 'FAIL' report.  CPAN Testers should ignore this
 result -- which is what you want if an external library dependency is not
 available.
 
+=head2 check_lib
+
+This behaves exactly the same as C<assert_lib()> except that it is silent,
+returning false instead of dieing, or true otherwise.
+
 =cut
 
 sub check_lib_or_exit {
@@ -158,6 +163,11 @@ sub check_lib_or_exit {
         warn $@;
         exit;
     }
+}
+
+sub check_lib {
+    eval 'assert_lib(@_)';
+    return $@ ? 0 : 1;
 }
 
 sub assert_lib {

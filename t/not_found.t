@@ -29,7 +29,7 @@ my @cases = (
     { arg => qq{lib => [qw/foo bar/]},            missing => [qw/foo bar/] },
 );
 
-plan tests => 2 * @cases;
+plan tests => 3 * @cases;
 
 for my $c ( @cases ) {
     eval "assert_lib(debug => $debug, $c->{arg})";
@@ -39,4 +39,6 @@ for my $c ( @cases ) {
     like ($err, "/^Can't link\/include ${miss_string}/ms", 
         "missing $miss_string detected"
     );
+    ok(!check_lib(debug => $debug, eval($c->{arg})),
+      "... and check_lib is false");
 }

@@ -1,6 +1,7 @@
 0.7     XXXX-XX-XX      Add support for checking if a function exists
                           in a library and it returns the right value
                           (see RT #48332)
+                        Add check_lib function
 
 0.6     2009-05-20      Support EU::MM-stylee command line, thanks to
                           DAXIM (see RT #46044)
