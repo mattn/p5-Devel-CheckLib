@@ -4,7 +4,7 @@ package Devel::CheckLib;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.699_001';
+$VERSION = '0.699_002';
 use Config;
 
 use File::Spec;
@@ -270,14 +270,15 @@ sub assert_lib {
             my @libpath = map { 
                 q{/libpath:} . Win32::GetShortPathName($_)
             } @libpaths; 
+            # this is horribly sensitive to the order of arguments
             @sys_cmd = (
                 @cc,
                 $cfile,
                 "${lib}.lib",
                 "/Fe$exefile", 
+                (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
                 "/link",
                 (map {'/libpath:'.Win32::GetShortPathName($_)} @libpaths),
-                (map { '/I'.Win32::GetShortPathName($_) } @incpaths)
             );
         } elsif($Config{cc} eq 'CC/DECC') {          # VMS
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
@@ -421,7 +422,9 @@ David Golden E<lt>dagolden@cpan.orgE<gt>
 Thanks to the cpan-testers-discuss mailing list for prompting us to write it
 in the first place;
 
-to Chris Williams for help with Borland support.
+to Chris Williams for help with Borland support;
+
+to Tony Cook for help with Microsoft compiler command-line options
 
 =head1 COPYRIGHT and LICENCE
 
