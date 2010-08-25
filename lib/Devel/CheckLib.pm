@@ -4,7 +4,7 @@ package Devel::CheckLib;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.699_002';
+$VERSION = '0.7';
 use Config;
 
 use File::Spec;
@@ -418,6 +418,8 @@ L<Probe::Perl>
 David Cantrell E<lt>david@cantrell.org.ukE<gt>
 
 David Golden E<lt>dagolden@cpan.orgE<gt>
+
+Yasuhiro Matsumoto E<lt>mattn@cpan.orgE<gt>
 
 Thanks to the cpan-testers-discuss mailing list for prompting us to write it
 in the first place;
