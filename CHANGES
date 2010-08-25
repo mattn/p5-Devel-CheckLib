@@ -1,4 +1,4 @@
-0.7     XXXX-XX-XX      Add support for checking if a function exists
+0.7     2010-08-25      Add support for checking if a function exists
                           in a library and it returns the right value
                           (see RT #48332)
                         Add check_lib function
