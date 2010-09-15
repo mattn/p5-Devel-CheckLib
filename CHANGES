@@ -1,3 +1,7 @@
+0.8     2010-09-15      Add include header files into dependencies files.
+                          (see RT #61297)
+                        Add minimum version number of perl.
+
 0.7     2010-08-25      Add support for checking if a function exists
                           in a library and it returns the right value
                           (see RT #48332)

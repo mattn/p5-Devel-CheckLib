@@ -5,7 +5,7 @@ package Devel::CheckLib;
 use 5.00405; #postfix foreach
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.7';
+$VERSION = '0.8';
 use Config;
 
 use File::Spec;
