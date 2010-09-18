@@ -7,6 +7,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT);
 $VERSION = '0.8';
 use Config;
+use Text::ParseWords 'quotewords';
 
 use File::Spec;
 use File::Temp;
@@ -329,12 +330,14 @@ sub _cleanup_exe {
 }
     
 sub _findcc {
+    my @flags = grep { length } map { quotewords('\s+', 0, $_) }
+        @Config{qw(ccflags ldflags)};
     my @paths = split(/$Config{path_sep}/, $ENV{PATH});
     my @cc = split(/\s+/, $Config{cc});
-    return @cc if -x $cc[0];
+    return (@cc, @flags) if -x $cc[0];
     foreach my $path (@paths) {
         my $compiler = File::Spec->catfile($path, $cc[0]) . $Config{_exe};
-        return ($compiler, @cc[1 .. $#cc]) if -x $compiler;
+        return ($compiler, @cc[1 .. $#cc], @flags) if -x $compiler;
     }
     die("Couldn't find your C compiler\n");
 }
