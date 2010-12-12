@@ -10,9 +10,19 @@ plan tests => 1;
 use Config;
 BEGIN {
     BEGIN { if (not $] < 5.006 ) { warnings->unimport('redefine') } }
-    *Config::STORE = sub { $_[0]->{$_[1]} = $_[2] } unless *Config::STORE
+    unless(defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
+      *Config::STORE = sub { $_[0]->{$_[1]} = $_[2] }
+    }
 }
 
+if(defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
+   my $obj = tied %Config::Config;
+   $obj->{cc} = "$^X $Config{cc}";
+}
+else {
+  $Config{cc} = "$^X $Config{cc}";
+}
+ 
 eval { $Config{cc} = "$^X $Config{cc}" };
 SKIP: {
     skip "Couldn't update %Config", 1 if $@ =~ /%Config::Config is read-only/;
