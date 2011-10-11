@@ -36,7 +36,7 @@ for my $c ( @cases ) {
     my $err = $@;
     ok ( $err, "died on '$c->{arg}'" );
     my $miss_string = join(q{, }, map { qq{'$_'} } @{$c->{missing}} );
-    like ($err, "/^Can't link\/include ${miss_string}/ms", 
+    like ($err, "/^Can't link\/include C library ${miss_string}/ms",
         "missing $miss_string detected"
     );
     ok(!check_lib(debug => $debug, eval($c->{arg})),
