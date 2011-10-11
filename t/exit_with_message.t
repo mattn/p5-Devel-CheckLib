@@ -18,7 +18,7 @@ if($err =~ /Couldn't find your C compiler/) {
     plan skip_all => "Couldn't find your C compiler";
 } else {
     plan tests => 1;
-    like ($err, "/^Can't link\\/include 'hlagh'/ms", 
+    like ($err, "/^Can't link\\/include C library 'hlagh'/ms",
         "missing hlagh detected non-fatally"
     );
 }
