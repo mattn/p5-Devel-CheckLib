@@ -314,7 +314,7 @@ sub assert_lib {
     unlink $cfile;
 
     my $miss_string = join( q{, }, map { qq{'$_'} } @missing );
-    die("Can't link/include $miss_string\n") if @missing;
+    die("Can't link/include C library $miss_string, aborting.\n") if @missing;
     my $wrong_string = join( q{, }, map { qq{'$_'} } @wrongresult);
     die("wrong result: $wrong_string\n") if @wrongresult;
 }
