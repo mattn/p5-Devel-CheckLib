@@ -1,4 +1,7 @@
-0.93    2011-10-14      Better error message.
+0.94    2011-10-14      Better error message.
+
+0.93    2011-04-09      Add support for gcc that have version number in the command name.
+                        Fix about that the command path include space character.
 
 0.92    2010-12-13      Patch included, thanks to CHM and SISYPHUS (see RT #63742)
 

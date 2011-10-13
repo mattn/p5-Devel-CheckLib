@@ -13,7 +13,7 @@ use File::Temp qw/tempdir/;
 use vars qw/@EXPORT @ISA/;
 @ISA = qw/Exporter/;
 @EXPORT = qw(
-    create_testlib 
+    create_testlib
     find_compiler
     find_binary
 );
@@ -42,13 +42,15 @@ sub create_testlib {
     my $code_fh = IO::File->new("${libname}.c", ">");
     print {$code_fh} "int libversion() { return 42; }\nint foo() { return 0; }\n";
     $code_fh->close;
-    
+
     my $cc = $Config{cc};
-    my $rv = 
+    my $gccv = $Config{gccversion};
+    my $rv =
         $cc eq 'gcc'    ? _gcc_lib( $libname )  :
         $cc eq 'cc'     ? _gcc_lib( $libname )  :
         $cc eq 'cl'     ? _cl_lib( $libname )   :
-                          undef         ;     
+        $gccv           ? _gcc_lib( $libname )  :
+                          undef         ;
 
     chdir $orig_wd;
     return $rv ? canonpath($tempdir) : undef;
