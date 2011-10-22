@@ -224,6 +224,8 @@ sub assert_lib {
         my($ch, $cfile) = File::Temp::tempfile(
             'assertlibXXXXXXXX', SUFFIX => '.c'
         );
+        my $ofile = $cfile;
+        $ofile =~ s/\.c$/$Config{_o}/;
         print $ch qq{#include <$_>\n} for @use_headers;
         print $ch qq{int main(void) { return 0; }\n};
         close($ch);
@@ -257,6 +259,7 @@ sub assert_lib {
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
         push @missing, $header if $rv != 0 || ! -x $exefile;
         _cleanup_exe($exefile);
+        unlink $ofile if -e $ofile;
         unlink $cfile;
     } 
 
@@ -264,6 +267,8 @@ sub assert_lib {
     my($ch, $cfile) = File::Temp::tempfile(
         'assertlibXXXXXXXX', SUFFIX => '.c'
     );
+    my $ofile = $cfile;
+    $ofile =~ s/\.c$/$Config{_o}/;
     print $ch qq{#include <$_>\n} foreach (@headers);
     print $ch "int main(void) { ".($args{function} || 'return 0;')." }\n";
     close($ch);
@@ -311,6 +316,7 @@ sub assert_lib {
         my $absexefile = File::Spec->rel2abs($exefile);
         $absexefile = '"'.$absexefile.'"' if $absexefile =~ m/\s/;
         push @wrongresult, $lib if $rv == 0 && -x $exefile && system($absexefile) != 0;
+        unlink $ofile if -e $ofile;
         _cleanup_exe($exefile);
     } 
     unlink $cfile;
@@ -328,6 +334,15 @@ sub _cleanup_exe {
     unlink $exefile if -f $exefile;
     unlink $ofile if -f $ofile;
     unlink "$exefile\.manifest" if -f "$exefile\.manifest";
+    if ( $Config{cc} eq 'cl' ) {
+        # MSVC also creates foo.ilk and foo.pdb
+        my $ilkfile = $exefile;
+        $ilkfile =~ s/$Config{_exe}$/.ilk/;
+        my $pdbfile = $exefile;
+        $pdbfile =~ s/$Config{_exe}$/.pdb/;
+        unlink $ilkfile if -f $ilkfile;
+        unlink $pdbfile if -f $pdbfile;
+    }
     return
 }
     
