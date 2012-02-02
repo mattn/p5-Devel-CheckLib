@@ -1,4 +1,7 @@
-0.95    2012-02-02      Pass linker options to MSVC.
+0.96    2012-02-02      Pass linker options to MSVC.
+
+0.95    2011-10-22      Clean up object files.
+                        Also MSVC generates extra files, clean them up.
 
 0.94    2011-10-14      Better error message.
 
