@@ -1,3 +1,5 @@
+0.95    2012-02-02      Pass linker options to MSVC.
+
 0.94    2011-10-14      Better error message.
 
 0.93    2011-04-09      Add support for gcc that have version number in the command name.
