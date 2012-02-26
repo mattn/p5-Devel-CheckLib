@@ -7,7 +7,7 @@ use Config;
 use Cwd;
 use Exporter;
 use IO::File;
-use File::Spec::Functions qw/catfile canonpath/;
+use File::Spec::Functions qw/catfile canonpath splitdir/;
 use File::Temp qw/tempdir/;
 
 use vars qw/@EXPORT @ISA/;
@@ -91,11 +91,26 @@ sub find_binary {
     if ($Config{_exe} && $program !~ /$Config{_exe}$/) {
         $program .= $Config{_exe};
     }
-    for my $path ( split /$Config{path_sep}/, $ENV{PATH} ) {
+    return $program if -x $program;
+
+    my @search_paths = split /$Config{path_sep}/, $ENV{PATH};
+    my @lib_search_paths = map lib_to_bin($_), split /$Config{path_sep}/, $ENV{LIBRARY_PATH};
+
+    for my $path ( @search_paths, @lib_search_paths ) {
         my $binary = catfile( $path, $program );
         return $binary if -x $binary;
     }
+
     return;
+}
+
+sub lib_to_bin {
+    my ( $lib_dir ) = @_;
+    my @parts = splitdir $lib_dir;
+    pop @parts;
+    push @parts, 'bin';
+    my $bin_dir = catfile(@parts);
+    return $bin_dir;
 }
 
 sub find_compiler {
