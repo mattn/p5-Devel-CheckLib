@@ -94,7 +94,7 @@ sub find_binary {
     return $program if -x $program;
 
     my @search_paths = split /$Config{path_sep}/, $ENV{PATH};
-    my @lib_search_paths = map lib_to_bin($_), split /$Config{path_sep}/, $ENV{LIBRARY_PATH};
+    my @lib_search_paths = map lib_to_bin($_), split /$Config{path_sep}/, $ENV{LIBRARY_PATH}||'';
 
     for my $path ( @search_paths, @lib_search_paths ) {
         my $binary = catfile( $path, $program );
