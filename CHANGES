@@ -1,4 +1,6 @@
-0.97    2012-03-17      Merge ldflags & perllibs.
+0.98    2012-03-17      Merge ldflags & perllibs.
+
+0.97    2012-02-02      Fixed test.
 
 0.96    2012-02-02      Pass linker options to MSVC.
 
