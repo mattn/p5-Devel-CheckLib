@@ -114,6 +114,11 @@ libraries (each preceded by '-l') and directories (preceded by '-L').
 
 This can also be supplied on the command-line.
 
+=item debug
+
+If true - emit information during processing that can be used for
+debugging.
+
 =back
 
 And libraries are no use without header files, so ...
