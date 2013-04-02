@@ -5,7 +5,7 @@ package Devel::CheckLib;
 use 5.00405; #postfix foreach
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.98';
+$VERSION = '0.99';
 use Config qw(%Config);
 use Text::ParseWords 'quotewords';
 
@@ -207,7 +207,7 @@ sub assert_lib {
     # using special form of split to trim whitespace
     if(defined($args{LIBS})) {
         foreach my $arg (split(' ', $args{LIBS})) {
-            die("LIBS argument badly-formed: $arg\n") unless($arg =~ /^-l/i);
+            die("LIBS argument badly-formed: $arg\n") unless($arg =~ /^-[lLR]/);
             push @{$arg =~ /^-l/ ? \@libs : \@libpaths}, substr($arg, 2);
         }
     }

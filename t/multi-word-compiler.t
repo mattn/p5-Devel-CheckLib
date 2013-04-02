@@ -22,7 +22,7 @@ if(defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
 else {
   $Config{cc} = "$^X $Config{cc}";
 }
- 
+
 eval { $Config{cc} = "$^X $Config{cc}" };
 SKIP: {
     skip "Couldn't update %Config", 1 if $@ =~ /%Config::Config is read-only/;
