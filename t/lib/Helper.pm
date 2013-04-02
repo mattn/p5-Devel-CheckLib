@@ -61,8 +61,9 @@ sub _gcc_lib {
     my $cc = find_compiler() or return;
     my $ar = find_binary('ar') or return;
     my $ranlib = find_binary('ranlib') or return;
+    my $ccflags = $Config{ccflags};
 
-    _quiet_system("$cc -c ${libname}.c") and return;
+    _quiet_system("$cc $ccflags -c ${libname}.c") and return;
     _quiet_system("$ar rc lib${libname}.a ${libname}.o") and return;
     _quiet_system("$ranlib lib${libname}.a") and return;
     return -f "lib${libname}.a"
