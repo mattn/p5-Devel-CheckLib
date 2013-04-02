@@ -1,3 +1,6 @@
+0.99     2013-04-02     Allow -R rpaths as libpaths used with solaris cc
+			  (see RT #81330)
+
 0.98    2012-03-17      Merge ldflags & perllibs.
 
 0.97    2012-02-02      Fixed test.

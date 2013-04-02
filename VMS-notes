@@ -3,11 +3,14 @@ http://perl-qa.hexten.net/wiki/index.php/Testing_on_VMS
 ---
 
 15:32 <anomenat> well $Config{cc} will contain 'CC/DECC', which is the right 
-                 command to use but "if -x $cc[0]" will fail                    15:33 <anomenat> then "CC/DECC foo.c" will compile foo.c to foo.obj             15:37 <DrHyde> how do i pass include paths?
+                 command to use but "if -x $cc[0]" will fail
+15:33 <anomenat> then "CC/DECC foo.c" will compile foo.c to foo.obj
+15:37 <DrHyde> how do i pass include paths?
 15:38 <anomenat> CC/DECC/INCLUDE_DIRECTORY=foo
 15:39 <anomenat> I'm still trying to work out the best way to do the linking
                  bit though
-15:40 <DrHyde> is CC/DECC/INCLUDE_DIRECTORY=foo/INCLUDE_DIRECTORY=bar valid?    15:41 <anomenat> yes
+15:40 <DrHyde> is CC/DECC/INCLUDE_DIRECTORY=foo/INCLUDE_DIRECTORY=bar valid?
+15:41 <anomenat> yes
 15:41 <DrHyde> hurrah!
 15:41 <anomenat> I'm still trying to work out the best way to do linking though
 16:17 <anomenat> well, buggered if I can find a standard place to put libraries
