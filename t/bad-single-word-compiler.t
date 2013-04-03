@@ -16,16 +16,15 @@ BEGIN {
 }
 
 if(defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
-   my $obj = tied %Config::Config;
-   $obj->{cc} = "$^X $Config{cc}";
+    my $obj = tied %Config::Config;
+    $obj->{cc} = "flibbertigibbet";
 }
 else {
-  $Config{cc} = "$^X $Config{cc}";
+    eval { $Config{cc} = 'flibbertigibbet' };
 }
 
-eval { $Config{cc} = 'flibbertigibbet' };
 SKIP: {
     skip "Couldn't update %Config", 1 if $@ =~ /%Config::Config is read-only/;
     eval "use Devel::CheckLib";
-    ok($@ =~ /^Couldn't find your C compiler/, "Bad multi-word compiler is not OK");
+    ok($@ =~ /^Couldn't find your C compiler/, "Bad single-word compiler is not OK");
 }
