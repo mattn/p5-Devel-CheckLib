@@ -1,6 +1,8 @@
-1.00     2013-07-26     Deprecate use-devel-checklib script.
+1.01    2013-07-26      Correct version
 
-0.99     2013-04-02     Allow -R rpaths as libpaths used with solaris cc
+1.00    2013-07-26      Deprecate use-devel-checklib script.
+
+0.99    2013-04-02      Allow -R rpaths as libpaths used with solaris cc
 			  (see RT #81330)
 
 0.98    2012-03-17      Merge ldflags & perllibs.
