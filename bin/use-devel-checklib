@@ -8,6 +8,11 @@ $/ = undef;
 use File::Spec;
 use Devel::CheckLib;
 
+warn "----------------------- [WARNING] --------\n";
+warn "THIS SCRIPT WAS DEPRECATED.\n";
+warn "YOU SHOULD USE configure_requires INSTEAD.\n";
+warn "---------- [/WARNING] --------------------\n";
+
 my @files = grep { -f $_ } qw(Makefile.PL Build.PL);
 push @files, 'Makefile.PL' unless(@files);
 
@@ -57,18 +62,13 @@ print "Updated/created MANIFEST\n";
 
 =head1 NAME
 
-use-devel-checklib - a script to package Devel::CheckLib with your code.
+use-devel-checklib - (DEPRECATED)a script to package Devel::CheckLib with your code.
 
 =head1 DESCRIPTION
 
-This script, when run in the directory in which your shiny new module
-lives, will bundle Devel::CheckLib in the C<inc> directory, and update
-your Makefile.PL (or Build.PL) appropriately.  If neither exists, it
-will create a Makefile.PL.
+This script was DEPRECATED.
 
-=head1 SYNOPSIS
-
-    use-devel-checklib list of libraries
+If you need to depend on this library, you should use `configure_requires` in Makefile.PL or Build.PL instead.
 
 =head1 WARNINGS, BUGS and FEEDBACK
 
