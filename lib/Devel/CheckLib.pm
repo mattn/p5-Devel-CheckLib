@@ -377,6 +377,10 @@ sub _findcc {
         my $compiler = File::Spec->catfile($path, $cc[0]) . $Config{_exe};
         return ([ $compiler, @cc[1 .. $#cc], @ccflags ], \@ldflags)
             if -x $compiler;
+        next if ! length $Config{_exe};
+        $compiler = File::Spec->catfile($path, $cc[0]);
+        return ([ $compiler, @cc[1 .. $#cc], @ccflags ], \@ldflags)
+            if -x $compiler;
     }
     die("Couldn't find your C compiler\n");
 }
