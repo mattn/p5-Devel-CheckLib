@@ -109,7 +109,7 @@ representing additional paths to search for libraries.
 
 =item LIBS
 
-a C<ExtUtils::MakeMaker>-style space-seperated list of
+a C<ExtUtils::MakeMaker>-style space-separated list of
 libraries (each preceded by '-l') and directories (preceded by '-L').
 
 This can also be supplied on the command-line.
@@ -137,7 +137,7 @@ representing additional paths to search for headers.
 
 =item INC
 
-a C<ExtUtils::MakeMaker>-style space-seperated list of
+a C<ExtUtils::MakeMaker>-style space-separated list of
 incpaths, each preceded by '-I'.
 
 This can also be supplied on the command-line.
@@ -421,7 +421,7 @@ sub _quiet_system {
 You must have a C compiler installed.  We check for C<$Config{cc}>,
 both literally as it is in Config.pm and also in the $PATH.
 
-It has been tested with varying degrees on rigourousness on:
+It has been tested with varying degrees of rigorousness on:
 
 =over
 
