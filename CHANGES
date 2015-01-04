@@ -1,3 +1,6 @@
+1.03    2015-01-04      Update travis.yml
+                        Fix possible crash bug on windows.
+
 1.02    2014-08-30      Remove .exe when it run on cygwin.
 
 1.01    2013-07-26      Correct version
