@@ -1,3 +1,5 @@
+1.04	2015-09-16	Handle $PERL_MM_OPT.
+
 1.03    2015-01-04      Update travis.yml
                         Fix possible crash bug on windows.
 
