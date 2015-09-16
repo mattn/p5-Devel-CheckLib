@@ -217,6 +217,12 @@ sub assert_lib {
             push @incpaths, substr($arg, 2);
         }
     }
+    foreach my $arg (split(' ', $ENV{PERL_MM_OPT}||'')) {
+        push @incpaths, substr($arg, 2)
+            if $arg =~ /^-I/;
+        push @{$arg =~ /^-l/ ? \@libs : \@libpaths}, substr($arg, 2)
+            if($arg =~ /^-[lLR]/);
+    }
 
     my ($cc, $ld) = _findcc();
     my @missing;
