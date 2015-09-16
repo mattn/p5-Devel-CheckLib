@@ -177,6 +177,68 @@ sub check_lib {
     return $@ ? 0 : 1;
 }
 
+# borrowed from Text::ParseWords
+sub _parse_line {
+    my($delimiter, $keep, $line) = @_;
+    my($word, @pieces);
+
+    no warnings 'uninitialized';  # we will be testing undef strings
+
+    while (length($line)) {
+        # This pattern is optimised to be stack conservative on older perls.
+        # Do not refactor without being careful and testing it on very long strings.
+        # See Perl bug #42980 for an example of a stack busting input.
+        $line =~ s/^
+                    (?:
+                        # double quoted string
+                        (")                             # $quote
+                        ((?>[^\\"]*(?:\\.[^\\"]*)*))"   # $quoted
+        | # --OR--
+                        # singe quoted string
+                        (')                             # $quote
+                        ((?>[^\\']*(?:\\.[^\\']*)*))'   # $quoted
+                    |   # --OR--
+                        # unquoted string
+                        (                               # $unquoted
+                            (?:\\.|[^\\"'])*?
+                        )
+                        # followed by
+                        (                               # $delim
+                            \Z(?!\n)                    # EOL
+                        |   # --OR--
+                            (?-x:$delimiter)            # delimiter
+                        |   # --OR--
+                            (?!^)(?=["'])               # a quote
+                        )
+        )//xs or return;    # extended layout
+        my ($quote, $quoted, $unquoted, $delim) = (($1 ? ($1,$2) : ($3,$4)), $5, $6);
+
+        return() unless( defined($quote) || length($unquoted) || length($delim));
+
+        if ($keep) {
+            $quoted = "$quote$quoted$quote";
+        }
+        else {
+            $unquoted =~ s/\\(.)/$1/sg;
+            if (defined $quote) {
+                $quoted =~ s/\\(.)/$1/sg if ($quote eq '"');
+            }
+        }
+        $word .= substr($line, 0, 0); # leave results tainted
+        $word .= defined $quote ? $quoted : $unquoted;
+
+        if (length($delim)) {
+            push(@pieces, $word);
+            push(@pieces, $delim) if ($keep eq 'delimiters');
+            undef $word;
+        }
+        if (!length($line)) {
+            push(@pieces, $word);
+        }
+    }
+    return(@pieces);
+}
+
 sub assert_lib {
     my %args = @_;
     my (@libs, @libpaths, @headers, @incpaths);
@@ -191,9 +253,12 @@ sub assert_lib {
     @incpaths = (ref($args{incpath}) ? @{$args{incpath}} : $args{incpath}) 
         if $args{incpath};
 
+    my @argv = @ARGV;
+    push @argv, _parse_line('\s+', 0, $ENV{PERL_MM_OPT}||'');
+
     # work-a-like for Makefile.PL's LIBS and INC arguments
     # if given as command-line argument, append to %args
-    for my $arg (@ARGV) {
+    for my $arg (@argv) {
         for my $mm_attr_key (qw(LIBS INC)) {
             if (my ($mm_attr_value) = $arg =~ /\A $mm_attr_key = (.*)/x) {
             # it is tempting to put some \s* into the expression, but the
@@ -216,12 +281,6 @@ sub assert_lib {
             die("INC argument badly-formed: $arg\n") unless($arg =~ /^-I/);
             push @incpaths, substr($arg, 2);
         }
-    }
-    foreach my $arg (split(' ', $ENV{PERL_MM_OPT}||'')) {
-        push @incpaths, substr($arg, 2)
-            if $arg =~ /^-I/;
-        push @{$arg =~ /^-l/ ? \@libs : \@libpaths}, substr($arg, 2)
-            if($arg =~ /^-[lLR]/);
     }
 
     my ($cc, $ld) = _findcc();

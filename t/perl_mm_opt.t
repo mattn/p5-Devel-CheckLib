@@ -33,7 +33,7 @@ my $runtime = '-l'.(
           )
         : 'm'                              # default to Unix-style
 );
-local $ENV{PERL_MM_OPT} = $runtime;
+local $ENV{PERL_MM_OPT} = "LIBS='$runtime'";
 
 my $rval = undef;
 capture(
@@ -49,7 +49,7 @@ capture(
 ok($stderr eq '' && defined($rval) && $rval == 0, "linked OK: ".$ENV{PERL_MM_OPT}) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
 
 $rval = undef;
-local $ENV{PERL_MM_OPT} = "$runtime -lbazbam -L$libdir";
+local $ENV{PERL_MM_OPT} = "LIBS='$runtime -lbazbam -L$libdir'";
 capture(
     sub { $rval = system(
         $Config{perlpath},
