@@ -283,7 +283,7 @@ sub assert_lib {
         }
     }
 
-    my ($cc, $ld) = _findcc();
+    my ($cc, $ld) = _findcc($args{debug});
     my @missing;
     my @wrongresult;
     my @use_headers;
@@ -333,7 +333,6 @@ sub assert_lib {
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
         push @missing, $header if $rv != 0 || ! -x $exefile;
         _cleanup_exe($exefile);
-        unlink $ofile if -e $ofile;
         unlink $cfile;
     } 
 
@@ -393,7 +392,6 @@ sub assert_lib {
         my $absexefile = File::Spec->rel2abs($exefile);
         $absexefile = '"'.$absexefile.'"' if $absexefile =~ m/\s/;
         push @wrongresult, $lib if $rv == 0 && -x $exefile && system($absexefile) != 0;
-        unlink $ofile if -e $ofile;
         _cleanup_exe($exefile);
     } 
     unlink $cfile;
@@ -408,17 +406,21 @@ sub _cleanup_exe {
     my ($exefile) = @_;
     my $ofile = $exefile;
     $ofile =~ s/$Config{_exe}$/$Config{_o}/;
-    unlink $exefile if -f $exefile;
-    unlink $ofile if -f $ofile;
-    unlink "$exefile\.manifest" if -f "$exefile\.manifest";
+    # List of files to remove
+    my @rmfiles;
+    push @rmfiles, $exefile, $ofile, "$exefile\.manifest";
     if ( $Config{cc} eq 'cl' ) {
         # MSVC also creates foo.ilk and foo.pdb
         my $ilkfile = $exefile;
         $ilkfile =~ s/$Config{_exe}$/.ilk/;
         my $pdbfile = $exefile;
         $pdbfile =~ s/$Config{_exe}$/.pdb/;
-        unlink $ilkfile if -f $ilkfile;
-        unlink $pdbfile if -f $pdbfile;
+	push @rmfiles, $ilkfile, $pdbfile;
+    }
+    foreach (@rmfiles) {
+	if ( -f $_ ) {
+	    unlink $_ or warn "Could not remove $_: $!";
+	}
     }
     return
 }
@@ -427,6 +429,7 @@ sub _cleanup_exe {
 # where $cc is an array ref of compiler name, compiler flags
 # where $ld is an array ref of linker flags
 sub _findcc {
+    my ($debug) = @_;
     # Need to use $keep=1 to work with MSWin32 backslashes and quotes
     my $Config_ccflags =  $Config{ccflags};  # use copy so ASPerl will compile
     my @Config_ldflags = ();
@@ -437,18 +440,42 @@ sub _findcc {
     my @ldflags = grep { length } quotewords('\s+', 1, @Config_ldflags);
     my @paths = split(/$Config{path_sep}/, $ENV{PATH});
     my @cc = split(/\s+/, $Config{cc});
-    return ( [ @cc, @ccflags ], \@ldflags ) if -x $cc[0];
-    foreach my $path (@paths) {
-        my $compiler = File::Spec->catfile($path, $cc[0]) . ($^O eq 'cygwin' ? '' : $Config{_exe});
-        return ([ $compiler, @cc[1 .. $#cc], @ccflags ], \@ldflags)
-            if -x $compiler;
-        next if ! length $Config{_exe};
-        $compiler = File::Spec->catfile($path, $cc[0]);
-        return ([ $compiler, @cc[1 .. $#cc], @ccflags ], \@ldflags)
-            if -x $compiler;
+    if (check_compiler ($cc[0], $debug)) {
+	return ( [ @cc, @ccflags ], \@ldflags );
     }
-    die("Couldn't find your C compiler\n");
+    # Find the extension for executables.
+    my $exe = $Config{_exe};
+    if ($^O eq 'cygwin') {
+	$exe = '';
+    }
+    foreach my $path (@paths) {
+	# Look for "$path/$cc[0].exe"
+        my $compiler = File::Spec->catfile($path, $cc[0]) . $exe;
+	if (check_compiler ($compiler, $debug)) {
+	    return ([ $compiler, @cc[1 .. $#cc], @ccflags ], \@ldflags)
+	}
+        next if ! $exe;
+	# Look for "$path/$cc[0]" without the .exe, if necessary.
+        $compiler = File::Spec->catfile($path, $cc[0]);
+	if (check_compiler ($compiler, $debug)) {
+	    return ([ $compiler, @cc[1 .. $#cc], @ccflags ], \@ldflags)
+	}
+    }
+    die("Couldn't find your C compiler.\n");
 }
+
+sub check_compiler
+{
+    my ($compiler, $debug) = @_;
+    if (-f $compiler && -x $compiler) {
+	if ($debug) {
+	    warn("# Compiler seems to be $compiler\n");
+	}
+	return 1;
+    }
+    return '';
+}
+
 
 # code substantially borrowed from IPC::Run3
 sub _quiet_system {
