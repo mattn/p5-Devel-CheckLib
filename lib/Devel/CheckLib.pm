@@ -310,7 +310,8 @@ sub assert_lib {
                 "/Fe$exefile",
                 (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
 		"/link",
-		@$ld
+		@$ld,
+		split(' ', $Config{libs}),
             );
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             @sys_cmd = (
@@ -362,6 +363,7 @@ sub assert_lib {
                 (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
                 "/link",
                 @$ld,
+                split(' ', $Config{libs}),
                 (map {'/libpath:'.Win32::GetShortPathName($_)} @libpaths),
             );
         } elsif($Config{cc} eq 'CC/DECC') {          # VMS
