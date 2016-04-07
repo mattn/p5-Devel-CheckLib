@@ -142,6 +142,15 @@ incpaths, each preceded by '-I'.
 
 This can also be supplied on the command-line.
 
+=item analyze_binary
+
+a callback function that will be invoked in order to perform custom
+analysis of the generated binary. The callback arguments are the
+library name and the path to the binary just compiled.
+
+It is possible to use this callback, for instance, to inspect the
+binary for further dependencies.
+
 =back
 
 =head2 check_lib_or_exit
@@ -252,6 +261,7 @@ sub assert_lib {
         if $args{header};
     @incpaths = (ref($args{incpath}) ? @{$args{incpath}} : $args{incpath}) 
         if $args{incpath};
+    my $analyze_binary = $args{analyze_binary};
 
     my @argv = @ARGV;
     push @argv, _parse_line('\s+', 0, $ENV{PERL_MM_OPT}||'');
@@ -286,6 +296,7 @@ sub assert_lib {
     my ($cc, $ld) = _findcc($args{debug});
     my @missing;
     my @wrongresult;
+    my @wronganalysis;
     my @use_headers;
 
     # first figure out which headers we can't find ...
@@ -390,10 +401,21 @@ sub assert_lib {
         }
         warn "# @sys_cmd\n" if $args{debug};
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
-        push @missing, $lib if $rv != 0 || ! -x $exefile;
-        my $absexefile = File::Spec->rel2abs($exefile);
-        $absexefile = '"'.$absexefile.'"' if $absexefile =~ m/\s/;
-        push @wrongresult, $lib if $rv == 0 && -x $exefile && system($absexefile) != 0;
+        if ($rv != 0 || ! -x $exefile) {
+            push @missing, $lib;
+        }
+        else {
+            my $absexefile = File::Spec->rel2abs($exefile);
+            $absexefile = '"'.$absexefile.'"' if $absexefile =~ m/\s/;
+            if (system($absexefile) != 0) {
+                push @wrongresult, $lib;
+            }
+            else {
+                if ($analyze_binary) {
+                    push @wronganalysis, $lib if !$analyze_binary->($lib, $exefile)
+                }
+            }
+        }
         _cleanup_exe($exefile);
     } 
     unlink $cfile;
@@ -402,6 +424,8 @@ sub assert_lib {
     die("Can't link/include C library $miss_string, aborting.\n") if @missing;
     my $wrong_string = join( q{, }, map { qq{'$_'} } @wrongresult);
     die("wrong result: $wrong_string\n") if @wrongresult;
+    my $analysis_string = join(q{, }, map { qq{'$_'} } @wronganalysis );
+    die("wrong analysis: $analysis_string") if @wronganalysis;
 }
 
 sub _cleanup_exe {
