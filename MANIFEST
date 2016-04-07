@@ -21,3 +21,4 @@ t/cmdline-LIBS-INC.t
 t/custom-function.t
 META.yml                                 Module meta-data (added by MakeMaker)
 t/analyze-binary.t
+t/flags.t
