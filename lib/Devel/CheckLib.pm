@@ -54,7 +54,7 @@ and link to the libraries.
 
 It works by trying to compile some code - which defaults to this:
 
-    int main(void) { return 0; }
+    int main(int argc, char *argv[]) { return 0; }
 
 and linking it to the specified libraries.  If something pops out the end
 which looks executable, it gets executed, and if main() returns 0 we know
@@ -355,7 +355,7 @@ sub assert_lib {
     my $ofile = $cfile;
     $ofile =~ s/\.c$/$Config{_o}/;
     print $ch qq{#include <$_>\n} foreach (@headers);
-    print $ch "int main(void) { ".($args{function} || 'return 0;')." }\n";
+    print $ch "int main(int argc, char *argv[]) { ".($args{function} || 'return 0;')." }\n";
     close($ch);
     for my $lib ( @libs ) {
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
