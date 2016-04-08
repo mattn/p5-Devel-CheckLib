@@ -1,6 +1,10 @@
-1.05	2015-09-16	Fix handling $PERL_MM_OPT.
+1.07    2016-04-09      Add analyze_binary feature.
 
-1.04	2015-09-16	Handle $PERL_MM_OPT.
+1.06    2016-02-20      Fix linking on MSVC.
+
+1.05    2015-09-16      Fix handling $PERL_MM_OPT.
+
+1.04    2015-09-16      Handle $PERL_MM_OPT.
 
 1.03    2015-01-04      Update travis.yml
                         Fix possible crash bug on windows.
@@ -12,7 +16,7 @@
 1.00    2013-07-26      Deprecate use-devel-checklib script.
 
 0.99    2013-04-02      Allow -R rpaths as libpaths used with solaris cc
-			  (see RT #81330)
+                        (see RT #81330)
 
 0.98    2012-03-17      Merge ldflags & perllibs.
 
