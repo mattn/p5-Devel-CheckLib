@@ -54,7 +54,7 @@ and link to the libraries.
 
 It works by trying to compile some code - which defaults to this:
 
-    int main(void) { return 0; }
+    int main(int argc, char *argv[]) { return 0; }
 
 and linking it to the specified libraries.  If something pops out the end
 which looks executable, it gets executed, and if main() returns 0 we know
@@ -141,6 +141,14 @@ a C<ExtUtils::MakeMaker>-style space-separated list of
 incpaths, each preceded by '-I'.
 
 This can also be supplied on the command-line.
+
+=item ccflags
+
+Extra flags to pass to the compiler.
+
+=item ldflags
+
+Extra flags to pass to the linker.
 
 =item analyze_binary
 
@@ -293,7 +301,7 @@ sub assert_lib {
         }
     }
 
-    my ($cc, $ld) = _findcc($args{debug});
+    my ($cc, $ld) = _findcc($args{debug}, $args{ccflags}, $args{ldflags});
     my @missing;
     my @wrongresult;
     my @wronganalysis;
@@ -355,7 +363,7 @@ sub assert_lib {
     my $ofile = $cfile;
     $ofile =~ s/\.c$/$Config{_o}/;
     print $ch qq{#include <$_>\n} foreach (@headers);
-    print $ch "int main(void) { ".($args{function} || 'return 0;')." }\n";
+    print $ch "int main(int argc, char *argv[]) { ".($args{function} || 'return 0;')." }\n";
     close($ch);
     for my $lib ( @libs ) {
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
@@ -455,15 +463,15 @@ sub _cleanup_exe {
 # where $cc is an array ref of compiler name, compiler flags
 # where $ld is an array ref of linker flags
 sub _findcc {
-    my ($debug) = @_;
+    my ($debug, $user_ccflags, $user_ldflags) = @_;
     # Need to use $keep=1 to work with MSWin32 backslashes and quotes
     my $Config_ccflags =  $Config{ccflags};  # use copy so ASPerl will compile
     my @Config_ldflags = ();
     for my $config_val ( @Config{qw(ldflags)} ){
         push @Config_ldflags, $config_val if ( $config_val =~ /\S/ );
     }
-    my @ccflags = grep { length } quotewords('\s+', 1, $Config_ccflags||'');
-    my @ldflags = grep { length } quotewords('\s+', 1, @Config_ldflags);
+    my @ccflags = grep { length } quotewords('\s+', 1, $Config_ccflags||'', $user_ccflags||'');
+    my @ldflags = grep { length } quotewords('\s+', 1, @Config_ldflags, $user_ldflags||'');
     my @paths = split(/$Config{path_sep}/, $ENV{PATH});
     my @cc = split(/\s+/, $Config{cc});
     if (check_compiler ($cc[0], $debug)) {
