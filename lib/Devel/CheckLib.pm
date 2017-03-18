@@ -354,7 +354,7 @@ sub assert_lib {
         push @missing, $header if $rv != 0 || ! -x $exefile;
         _cleanup_exe($exefile);
         unlink $cfile;
-    } 
+    }
 
     # now do each library in turn with headers
     my($ch, $cfile) = File::Temp::tempfile(
@@ -408,6 +408,7 @@ sub assert_lib {
             );
         }
         warn "# @sys_cmd\n" if $args{debug};
+        local $ENV{LD_RUN_PATH} = join(":", @libpaths).":".$ENV{LD_RUN_PATH} unless $^O eq 'MSWin32';
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
         if ($rv != 0 || ! -x $exefile) {
             push @missing, $lib;
