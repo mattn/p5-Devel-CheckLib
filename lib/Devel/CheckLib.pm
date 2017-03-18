@@ -5,7 +5,7 @@ package Devel::CheckLib;
 use 5.00405; #postfix foreach
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.07';
+$VERSION = '1.08';
 use Config qw(%Config);
 use Text::ParseWords 'quotewords';
 
