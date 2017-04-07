@@ -23,6 +23,7 @@ WriteMakefile1(
     BUILD_REQUIRES => {
         'Test::More'        => 0.62,  # too high? but API changed here
         'IO::CaptureOutput' => 1.0801,
+        'Mock::Config'      => 0.02,
     },
     LICENSE => 'perl',
     EXE_FILES    => [qw(
