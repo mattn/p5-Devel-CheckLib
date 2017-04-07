@@ -11,6 +11,7 @@ use Config;
 BEGIN {
     BEGIN { if (not $] < 5.006 ) { warnings->unimport('redefine') } }
     unless(defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
+      plan skip_all => "XSConfig is readonly" if $Config{usecperl} or exists &Config::KEYS;
       *Config::STORE = sub { $_[0]->{$_[1]} = $_[2] }
     }
 }
