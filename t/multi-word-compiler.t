@@ -9,22 +9,28 @@ plan tests => 1;
 
 use Config;
 BEGIN {
-    BEGIN { if (not $] < 5.006 ) { warnings->unimport('redefine') } }
+    eval 'use Mock::Config;';
+    warnings->unimport('redefine') if $] >= 5.006;
     unless(defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
-      plan skip_all => "XSConfig is readonly" if $Config{usecperl} or exists &Config::KEYS;
-      *Config::STORE = sub { $_[0]->{$_[1]} = $_[2] }
+        if (!$Mock::Config::VERSION) {
+            plan skip_all => "XSConfig is readonly"
+                if $Config{usecperl} or exists &Config::KEYS;
+            *Config::STORE = sub { $_[0]->{$_[1]} = $_[2] }
+        }
     }
 }
 
-if(defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
-   my $obj = tied %Config::Config;
-   $obj->{cc} = "$^X $Config{cc}";
+if ($Mock::Config::VERSION) {
+    Mock::Config->import(cc => "$^X $Config{cc}");
+}
+elsif (defined($ActivePerl::VERSION) && $Config{cc} =~ /\bgcc\b/) {
+    my $obj = tied %Config::Config;
+    $obj->{cc} = "$^X $Config{cc}";
 }
 else {
-  $Config{cc} = "$^X $Config{cc}";
+    eval { $Config{cc} = "$^X $Config{cc}"; }
 }
 
-eval { $Config{cc} = "$^X $Config{cc}" };
 SKIP: {
     skip "Couldn't update %Config", 1 if $@ =~ /%Config::Config is read-only/;
     eval "use Devel::CheckLib";
