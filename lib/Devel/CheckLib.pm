@@ -343,9 +343,9 @@ sub assert_lib {
         } else { # Unix-ish: gcc, Sun, AIX (gcc, cc), ...
             @sys_cmd = (
                 @$cc,
-                @$ld,
-                $cfile,
                 (map { "-I$_" } @incpaths),
+                $cfile,
+                @$ld,
                 "-o", "$exefile"
             );
         }
@@ -399,12 +399,12 @@ sub assert_lib {
                                                      # gcc, Sun, AIX (gcc, cc)
             @sys_cmd = (
                 @$cc,
-                @$ld,
-                $cfile,
-                "-o", "$exefile",
                 (map { "-I$_" } @incpaths),
+                $cfile,
                 (map { "-L$_" } @libpaths),
                 "-l$lib",
+                @$ld,
+                "-o", "$exefile",
             );
         }
         warn "# @sys_cmd\n" if $args{debug};
