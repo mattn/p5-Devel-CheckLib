@@ -159,6 +159,10 @@ library name and the path to the binary just compiled.
 It is possible to use this callback, for instance, to inspect the
 binary for further dependencies.
 
+=item not_execute
+
+Do not try to execute generated binary. Only check that compilation has not failed.
+
 =back
 
 =head2 check_lib_or_exit
@@ -270,6 +274,7 @@ sub assert_lib {
     @incpaths = (ref($args{incpath}) ? @{$args{incpath}} : $args{incpath}) 
         if $args{incpath};
     my $analyze_binary = $args{analyze_binary};
+    my $not_execute = $args{not_execute};
 
     my @argv = @ARGV;
     push @argv, _parse_line('\s+', 0, $ENV{PERL_MM_OPT}||'');
@@ -351,7 +356,7 @@ sub assert_lib {
         }
         warn "# @sys_cmd\n" if $args{debug};
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
-        push @missing, $header if $rv != 0 || ! -x $exefile;
+        push @missing, $header if $rv != 0 || ! -f $exefile;
         _cleanup_exe($exefile);
         unlink $cfile;
     }
@@ -411,13 +416,14 @@ sub assert_lib {
         local $ENV{LD_RUN_PATH} = join(":", grep $_, @libpaths, $ENV{LD_RUN_PATH}) unless $^O eq 'MSWin32';
         local $ENV{PATH} = join(";", @libpaths).";".$ENV{PATH} if $^O eq 'MSWin32';
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
-        if ($rv != 0 || ! -x $exefile) {
+        if ($rv != 0 || ! -f $exefile) {
             push @missing, $lib;
         }
         else {
+            chmod 0755, $exefile;
             my $absexefile = File::Spec->rel2abs($exefile);
             $absexefile = '"'.$absexefile.'"' if $absexefile =~ m/\s/;
-            if (system($absexefile) != 0) {
+            if (!$not_execute && system($absexefile) != 0) {
                 push @wrongresult, $lib;
             }
             else {
