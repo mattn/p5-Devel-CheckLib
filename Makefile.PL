@@ -8,7 +8,13 @@ $^W = 1;
 
 WriteMakefile1(
     NAME         => 'Devel::CheckLib',
+    ABSTRACT_FROM => 'lib/Devel/CheckLib.pm',
     VERSION_FROM => 'lib/Devel/CheckLib.pm',
+    AUTHOR => [
+        'David Cantrell',
+        'David Golden',
+        'Yasuhiro Matsumoto',
+    ],
     PREREQ_PM    => {
         'File::Temp'        => 0.16,
         'Exporter'          => 0,
