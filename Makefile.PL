@@ -26,7 +26,7 @@ WriteMakefile1(
             repository => 'http://github.com/mattn/p5-Devel-CheckLib',
         },
     },
-    BUILD_REQUIRES => {
+    TEST_REQUIRES => {
         'Test::More'        => 0.62,  # too high? but API changed here
         'IO::CaptureOutput' => 1.0801,
         'Mock::Config'      => 0.02,
