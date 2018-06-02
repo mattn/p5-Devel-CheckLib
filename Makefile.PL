@@ -22,6 +22,7 @@ WriteMakefile1(
     },
     MIN_PERL_VERSION => '5.00405',
     META_MERGE => {
+        dynamic_config => 0,
         resources => {
             repository => 'http://github.com/mattn/p5-Devel-CheckLib',
         },
