@@ -28,7 +28,7 @@ WriteMakefile1(
         },
     },
     TEST_REQUIRES => {
-        'Test::More'        => 0.62,  # too high? but API changed here
+        'Test::More'        => 0.88,  # done_testing
         'IO::CaptureOutput' => 1.0801,
         'Mock::Config'      => 0.02,
     },
