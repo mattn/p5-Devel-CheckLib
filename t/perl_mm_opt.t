@@ -3,7 +3,7 @@ use strict;
 BEGIN{ if (not $] < 5.006) { require warnings; warnings->import } }
 
 use lib 't/lib';
-use IO::CaptureOutput qw(capture);
+use Capture::Tiny qw(capture);
 use Config;
 
 use File::Spec;
@@ -36,28 +36,24 @@ my $runtime = '-l'.(
 local $ENV{PERL_MM_OPT} = "LIBS='$runtime'";
 
 my $rval = undef;
-capture(
-    sub { $rval = system(
+($stdout, $stderr) = capture {
+    $rval = system(
         $Config{perlpath},
 	'-Mblib',
 	'-MDevel::CheckLib',
 	'-e',
-	"print @ARGV;assert_lib(debug => $debug)")},
-    \$stdout,
-    \$stderr
-);
+	"print @ARGV;assert_lib(debug => $debug)");
+};
 ok($stderr eq '' && defined($rval) && $rval == 0, "linked OK: ".$ENV{PERL_MM_OPT}) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
 
 $rval = undef;
 local $ENV{PERL_MM_OPT} = "LIBS='$runtime -lbazbam -L$libdir'";
-capture(
-    sub { $rval = system(
+($stdout, $stderr) = capture {
+    $rval = system(
         $Config{perlpath},
 	'-Mblib',
 	'-MDevel::CheckLib',
 	'-e',
-	"print @ARGV;assert_lib(debug => $debug)")},
-    \$stdout,
-    \$stderr
-);
+	"print @ARGV;assert_lib(debug => $debug)");
+};
 ok($stderr eq '' && defined($rval) && $rval == 0, "linked OK: ".$ENV{PERL_MM_OPT}) || diag("\tSTDOUT: $stdout\n\tSTDERR: $stderr\n");
