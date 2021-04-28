@@ -370,6 +370,7 @@ sub assert_lib {
     print $ch "int main(int argc, char *argv[]) { ".($args{function} || 'return 0;')." }\n";
     close($ch);
     for my $lib ( @libs ) {
+        last if $Config{cc} eq 'CC/DECC';          # VMS
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd;
         if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
@@ -388,7 +389,6 @@ sub assert_lib {
 		_parsewords($Config{libs}),
                 (map {'/libpath:'.$_} @libpaths),
             );
-        } elsif($Config{cc} eq 'CC/DECC') {          # VMS
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             @sys_cmd = (
                 @$cc,
