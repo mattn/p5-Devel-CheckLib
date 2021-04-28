@@ -460,10 +460,8 @@ sub _cleanup_exe {
         $pdbfile =~ s/$Config{_exe}$/.pdb/;
 	push @rmfiles, $ilkfile, $pdbfile;
     }
-    foreach (@rmfiles) {
-	if ( -f $_ ) {
-	    unlink $_ or warn "Could not remove $_: $!";
-	}
+    foreach (grep -f, @rmfiles) {
+	unlink $_ or warn "Could not remove $_: $!";
     }
     return
 }
