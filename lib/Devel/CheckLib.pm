@@ -305,6 +305,18 @@ sub _compile_cmd {
     @sys_cmd;
 }
 
+sub _make_cfile {
+    my ($use_headers, $function) = @_;
+    my ($ch, $cfile) = File::Temp::tempfile(
+	'assertlibXXXXXXXX', SUFFIX => '.c'
+    );
+    print $ch qq{#include <$_>\n} for @$use_headers;
+    print $ch "int main(int argc, char *argv[]) { ".($function || 'return 0;')." }\n";
+    close $ch;
+    (my $ofile = $cfile) =~ s/\.c$/$Config{_o}/;
+    ($cfile, $ofile);
+}
+
 sub assert_lib {
     my %args = @_;
     $args{$_} = [$args{$_}]
@@ -354,14 +366,7 @@ sub assert_lib {
     # first figure out which headers we can't find ...
     for my $header (@headers) {
         push @use_headers, $header;
-        my($ch, $cfile) = File::Temp::tempfile(
-            'assertlibXXXXXXXX', SUFFIX => '.c'
-        );
-        my $ofile = $cfile;
-        $ofile =~ s/\.c$/$Config{_o}/;
-        print $ch qq{#include <$_>\n} for @use_headers;
-        print $ch qq{int main(void) { return 0; }\n};
-        close($ch);
+        my ($cfile, $ofile) = _make_cfile(\@use_headers, '');
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd = _compile_cmd($Config{cc}, $cc, $cfile, $exefile, \@incpaths, $ld, $Config{libs});
         warn "# @sys_cmd\n" if $args{debug};
@@ -372,14 +377,7 @@ sub assert_lib {
     }
 
     # now do each library in turn with headers
-    my($ch, $cfile) = File::Temp::tempfile(
-        'assertlibXXXXXXXX', SUFFIX => '.c'
-    );
-    my $ofile = $cfile;
-    $ofile =~ s/\.c$/$Config{_o}/;
-    print $ch qq{#include <$_>\n} foreach (@headers);
-    print $ch "int main(int argc, char *argv[]) { ".($args{function} || 'return 0;')." }\n";
-    close($ch);
+    my ($cfile, $ofile) = _make_cfile(\@headers, $args{function});
     for my $lib ( @libs ) {
         last if $Config{cc} eq 'CC/DECC';          # VMS
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
