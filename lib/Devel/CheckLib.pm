@@ -7,7 +7,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT);
 $VERSION = '1.14';
 use Config qw(%Config);
-use Text::ParseWords 'quotewords';
+use Text::ParseWords qw(quotewords shellwords);
 
 use File::Spec;
 use File::Temp;
@@ -260,6 +260,12 @@ sub _parse_line {
     return(@pieces);
 }
 
+sub _parsewords {
+    return shellwords @_ if $^O ne 'MSWin32';
+    # for Win32, take off "" but leave \
+    map { my $s=$_; $s =~ s/^"(.*)"$/$1/; $s } grep defined && length, quotewords '\s+', 1, @_;
+}
+
 sub assert_lib {
     my %args = @_;
     my (@libs, @libpaths, @headers, @incpaths);
@@ -292,15 +298,14 @@ sub assert_lib {
         }
     }
 
-    # using special form of split to trim whitespace
     if(defined($args{LIBS})) {
-        foreach my $arg (split(' ', $args{LIBS})) {
+        foreach my $arg (_parsewords($args{LIBS})) {
             die("LIBS argument badly-formed: $arg\n") unless($arg =~ /^-[lLR]/);
             push @{$arg =~ /^-l/ ? \@libs : \@libpaths}, substr($arg, 2);
         }
     }
     if(defined($args{INC})) {
-        foreach my $arg (split(' ', $args{INC})) {
+        foreach my $arg (_parsewords($args{INC})) {
             die("INC argument badly-formed: $arg\n") unless($arg =~ /^-I/);
             push @incpaths, substr($arg, 2);
         }
@@ -335,7 +340,7 @@ sub assert_lib {
                 (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
 		"/link",
 		@$ld,
-		split(' ', $Config{libs}),
+		_parsewords($Config{libs}),
             );
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             @sys_cmd = (
@@ -387,7 +392,7 @@ sub assert_lib {
                 (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
                 "/link",
                 @$ld,
-                split(' ', $Config{libs}),
+		_parsewords($Config{libs}),
                 (map {'/libpath:'.Win32::GetShortPathName($_)} @libpaths),
             );
         } elsif($Config{cc} eq 'CC/DECC') {          # VMS
@@ -479,10 +484,10 @@ sub _findcc {
     for my $config_val ( @Config{qw(ldflags)} ){
         push @Config_ldflags, $config_val if ( $config_val =~ /\S/ );
     }
-    my @ccflags = grep { length } quotewords('\s+', 1, $Config_ccflags||'', $user_ccflags||'');
-    my @ldflags = grep { length && $_ !~ m/^-Wl/ } quotewords('\s+', 1, @Config_ldflags, $user_ldflags||'');
+    my @ccflags = grep { length } _parsewords($Config_ccflags||'', $user_ccflags||'');
+    my @ldflags = grep { length && $_ !~ m/^-Wl/ } _parsewords(@Config_ldflags, $user_ldflags||'');
     my @paths = split(/$Config{path_sep}/, $ENV{PATH});
-    my @cc = split(/\s+/, $Config{cc});
+    my @cc = _parsewords($Config{cc});
     if (check_compiler ($cc[0], $debug)) {
 	return ( [ @cc, @ccflags ], \@ldflags );
     }
