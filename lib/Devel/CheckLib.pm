@@ -327,12 +327,11 @@ sub assert_lib {
         my @sys_cmd;
         # FIXME: re-factor - almost identical code later when linking
         if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
-            require Win32;
             @sys_cmd = (
                 @$cc,
                 $cfile,
                 "/Fe$exefile",
-                (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
+                (map { '/I'.$_ } @incpaths),
 		"/link",
 		@$ld,
 		_parsewords($Config{libs}),
@@ -374,9 +373,8 @@ sub assert_lib {
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd;
         if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
-            require Win32;
             my @libpath = map { 
-                q{/libpath:} . Win32::GetShortPathName($_)
+                q{/libpath:} . $_
             } @libpaths; 
             # this is horribly sensitive to the order of arguments
             @sys_cmd = (
@@ -384,11 +382,11 @@ sub assert_lib {
                 $cfile,
                 "${lib}.lib",
                 "/Fe$exefile", 
-                (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
+                (map { '/I'.$_ } @incpaths),
                 "/link",
                 @$ld,
 		_parsewords($Config{libs}),
-                (map {'/libpath:'.Win32::GetShortPathName($_)} @libpaths),
+                (map {'/libpath:'.$_} @libpaths),
             );
         } elsif($Config{cc} eq 'CC/DECC') {          # VMS
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
