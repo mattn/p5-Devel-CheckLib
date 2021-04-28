@@ -268,17 +268,12 @@ sub _parsewords {
 
 sub assert_lib {
     my %args = @_;
-    my (@libs, @libpaths, @headers, @incpaths);
-
-    # FIXME: these four just SCREAM "refactor" at me
-    @libs = (ref($args{lib}) ? @{$args{lib}} : $args{lib}) 
-        if $args{lib};
-    @libpaths = (ref($args{libpath}) ? @{$args{libpath}} : $args{libpath}) 
-        if $args{libpath};
-    @headers = (ref($args{header}) ? @{$args{header}} : $args{header}) 
-        if $args{header};
-    @incpaths = (ref($args{incpath}) ? @{$args{incpath}} : $args{incpath}) 
-        if $args{incpath};
+    $args{$_} = [$args{$_}]
+        for grep $args{$_} && !ref($args{$_}), qw(lib libpath header incpath);
+    my @libs = @{$args{lib} || []};
+    my @libpaths = @{$args{libpath} || []};
+    my @headers = @{$args{header} || []};
+    my @incpaths = @{$args{incpath} || []};
     my $analyze_binary = $args{analyze_binary};
     my $not_execute = $args{not_execute};
 
