@@ -306,12 +306,18 @@ sub _compile_cmd {
 }
 
 sub _make_cfile {
-    my ($use_headers, $function) = @_;
+    my ($use_headers, $function, $debug) = @_;
+    my $code = '';
+    $code .= qq{#include <$_>\n} for @$use_headers;
+    $code .= "int main(int argc, char *argv[]) { ".($function || 'return 0;')." }\n";
+    if ($debug) {
+	(my $c = $code) =~ s:^:# :gm;
+	warn "# Code:\n$c\n";
+    }
     my ($ch, $cfile) = File::Temp::tempfile(
 	'assertlibXXXXXXXX', SUFFIX => '.c'
     );
-    print $ch qq{#include <$_>\n} for @$use_headers;
-    print $ch "int main(int argc, char *argv[]) { ".($function || 'return 0;')." }\n";
+    print $ch $code;
     close $ch;
     (my $ofile = $cfile) =~ s/\.c$/$Config{_o}/;
     ($cfile, $ofile);
@@ -326,7 +332,7 @@ sub assert_lib {
     my @headers = @{$args{header} || []};
     my @incpaths = @{$args{incpath} || []};
     my $analyze_binary = $args{analyze_binary};
-    my $not_execute = $args{not_execute};
+    my $execute = !$args{not_execute};
 
     my @argv = @ARGV;
     push @argv, _parse_line('\s+', 0, $ENV{PERL_MM_OPT}||'');
@@ -366,7 +372,7 @@ sub assert_lib {
     # first figure out which headers we can't find ...
     for my $header (@headers) {
         push @use_headers, $header;
-        my ($cfile, $ofile) = _make_cfile(\@use_headers, '');
+        my ($cfile, $ofile) = _make_cfile(\@use_headers, '', $args{debug});
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd = _compile_cmd($Config{cc}, $cc, $cfile, $exefile, \@incpaths, $ld, $Config{libs});
         warn "# @sys_cmd\n" if $args{debug};
@@ -377,7 +383,7 @@ sub assert_lib {
     }
 
     # now do each library in turn with headers
-    my ($cfile, $ofile) = _make_cfile(\@headers, $args{function});
+    my ($cfile, $ofile) = _make_cfile(\@use_headers, @args{qw(function debug)});
     for my $lib ( @libs ) {
         last if $Config{cc} eq 'CC/DECC';          # VMS
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
@@ -393,14 +399,14 @@ sub assert_lib {
             chmod 0755, $exefile;
             my $absexefile = File::Spec->rel2abs($exefile);
             $absexefile = '"'.$absexefile.'"' if $absexefile =~ m/\s/;
-            if (!$not_execute && system($absexefile) != 0) {
-                push @wrongresult, $lib;
+            warn "# Execute($execute): $absexefile\n" if $args{debug};
+            if ($execute) {
+                my $retval = system($absexefile);
+                warn "# return value: $retval\n" if $args{debug};
+                push @wrongresult, $lib if $retval != 0;
             }
-            else {
-                if ($analyze_binary) {
-                    push @wronganalysis, $lib if !$analyze_binary->($lib, $exefile)
-                }
-            }
+            push @wronganalysis, $lib
+                if $analyze_binary and !$analyze_binary->($lib, $exefile);
         }
         _cleanup_exe($exefile);
     }
@@ -434,7 +440,7 @@ sub _cleanup_exe {
     }
     return
 }
-    
+
 # return ($cc, $ld)
 # where $cc is an array ref of compiler name, compiler flags
 # where $ld is an array ref of linker flags
@@ -478,11 +484,10 @@ sub check_compiler
 {
     my ($compiler, $debug) = @_;
     if (-f $compiler && -x $compiler) {
-	if ($debug) {
-	    warn("# Compiler seems to be $compiler\n");
-	}
+	warn "# Compiler seems to be $compiler\n" if $debug;
 	return 1;
     }
+    warn "# Compiler was not $compiler\n" if $debug;
     return '';
 }
 
