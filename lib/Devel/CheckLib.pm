@@ -266,6 +266,45 @@ sub _parsewords {
     map { my $s=$_; $s =~ s/^"(.*)"$/$1/; $s } grep defined && length, quotewords '\s+', 1, @_;
 }
 
+sub _compile_cmd {
+    my ($Config_cc, $cc, $cfile, $exefile, $incpaths, $ld, $Config_libs, $lib, $libpaths) = @_;
+    my @sys_cmd = @$cc;
+    if ( $Config_cc eq 'cl' ) {                 # Microsoft compiler
+	# this is horribly sensitive to the order of arguments
+	push @sys_cmd,
+	    $cfile,
+	    (defined $lib ? "${lib}.lib" : ()),
+	    "/Fe$exefile",
+	    (map '/I'.$_, @$incpaths),
+	    "/link",
+	    @$ld,
+	    _parsewords($Config_libs),
+	    (defined $lib ? map '/libpath:'.$_, @$libpaths : ()),
+	    ;
+    } elsif($Config_cc =~ /bcc32(\.exe)?/) {    # Borland
+	push @sys_cmd,
+	    @$ld,
+	    (map "-I$_", @$incpaths),
+	    "-o$exefile",
+	    (defined $lib ? ((map "-L$_", @$libpaths), "-l$lib") : ()),
+	    $cfile,
+	    ;
+    } else { # Unix-ish: gcc, Sun, AIX (gcc, cc), ...
+	push @sys_cmd,
+	    (map "-I$_", @$incpaths),
+	    $cfile,
+	    (!defined $lib ? () : (
+	      (map "-L$_", @$libpaths),
+	      ($^O eq 'darwin' ? (map { "-Wl,-rpath,$_" } @$libpaths) : ()),
+	      "-l$lib",
+	    )),
+	    @$ld,
+	    "-o", $exefile,
+	    ;
+    }
+    @sys_cmd;
+}
+
 sub assert_lib {
     my %args = @_;
     $args{$_} = [$args{$_}]
@@ -324,35 +363,7 @@ sub assert_lib {
         print $ch qq{int main(void) { return 0; }\n};
         close($ch);
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
-        my @sys_cmd;
-        # FIXME: re-factor - almost identical code later when linking
-        if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
-            @sys_cmd = (
-                @$cc,
-                $cfile,
-                "/Fe$exefile",
-                (map { '/I'.$_ } @incpaths),
-		"/link",
-		@$ld,
-		_parsewords($Config{libs}),
-            );
-        } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
-            @sys_cmd = (
-                @$cc,
-                @$ld,
-                (map { "-I$_" } @incpaths),
-                "-o$exefile",
-                $cfile
-            );
-        } else { # Unix-ish: gcc, Sun, AIX (gcc, cc), ...
-            @sys_cmd = (
-                @$cc,
-                (map { "-I$_" } @incpaths),
-                $cfile,
-                @$ld,
-                "-o", "$exefile"
-            );
-        }
+        my @sys_cmd = _compile_cmd($Config{cc}, $cc, $cfile, $exefile, \@incpaths, $ld, $Config{libs});
         warn "# @sys_cmd\n" if $args{debug};
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
         push @missing, $header if $rv != 0 || ! -f $exefile;
@@ -372,45 +383,7 @@ sub assert_lib {
     for my $lib ( @libs ) {
         last if $Config{cc} eq 'CC/DECC';          # VMS
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
-        my @sys_cmd;
-        if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
-            my @libpath = map { 
-                q{/libpath:} . $_
-            } @libpaths; 
-            # this is horribly sensitive to the order of arguments
-            @sys_cmd = (
-                @$cc,
-                $cfile,
-                "${lib}.lib",
-                "/Fe$exefile", 
-                (map { '/I'.$_ } @incpaths),
-                "/link",
-                @$ld,
-		_parsewords($Config{libs}),
-                (map {'/libpath:'.$_} @libpaths),
-            );
-        } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
-            @sys_cmd = (
-                @$cc,
-                @$ld,
-                "-o$exefile",
-                (map { "-I$_" } @incpaths),
-                (map { "-L$_" } @libpaths),
-                "-l$lib",
-                $cfile);
-        } else {                                     # Unix-ish
-                                                     # gcc, Sun, AIX (gcc, cc)
-            @sys_cmd = (
-                @$cc,
-                (map { "-I$_" } @incpaths),
-                $cfile,
-                (map { "-L$_" } @libpaths),
-                ($^O eq 'darwin' ? (map { "-Wl,-rpath,$_" } @libpaths) : ()),
-                "-l$lib",
-                @$ld,
-                "-o", "$exefile",
-            );
-        }
+        my @sys_cmd = _compile_cmd($Config{cc}, $cc, $cfile, $exefile, \@incpaths, $ld, $Config{libs}, $lib, \@libpaths);
         warn "# @sys_cmd\n" if $args{debug};
         local $ENV{LD_RUN_PATH} = join(":", grep $_, @libpaths, $ENV{LD_RUN_PATH}) unless $^O eq 'MSWin32' or $^O eq 'darwin';
         local $ENV{PATH} = join(";", @libpaths).";".$ENV{PATH} if $^O eq 'MSWin32';
@@ -432,14 +405,14 @@ sub assert_lib {
             }
         }
         _cleanup_exe($exefile);
-    } 
+    }
     unlink $cfile;
 
-    my $miss_string = join( q{, }, map { qq{'$_'} } @missing );
+    my $miss_string = join( q{, }, map qq{'$_'}, @missing );
     die("Can't link/include C library $miss_string, aborting.\n") if @missing;
-    my $wrong_string = join( q{, }, map { qq{'$_'} } @wrongresult);
+    my $wrong_string = join( q{, }, map qq{'$_'}, @wrongresult);
     die("wrong result: $wrong_string\n") if @wrongresult;
-    my $analysis_string = join(q{, }, map { qq{'$_'} } @wronganalysis );
+    my $analysis_string = join(q{, }, map qq{'$_'}, @wronganalysis );
     die("wrong analysis: $analysis_string") if @wronganalysis;
 }
 
