@@ -402,11 +402,16 @@ sub assert_lib {
                 $cfile);
         } else {                                     # Unix-ish
                                                      # gcc, Sun, AIX (gcc, cc)
+            my @rpath;
+            if ($^O eq "darwin") {
+                @rpath = map { "-Wl,-rpath,$_" } @libpaths;
+            }
             @sys_cmd = (
                 @$cc,
                 (map { "-I$_" } @incpaths),
                 $cfile,
                 (map { "-L$_" } @libpaths),
+                @rpath,
                 "-l$lib",
                 @$ld,
                 "-o", "$exefile",
