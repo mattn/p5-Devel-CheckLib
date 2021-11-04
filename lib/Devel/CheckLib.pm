@@ -407,13 +407,14 @@ sub assert_lib {
                 (map { "-I$_" } @incpaths),
                 $cfile,
                 (map { "-L$_" } @libpaths),
+                ($^O eq 'darwin' ? (map { "-Wl,-rpath,$_" } @libpaths) : ()),
                 "-l$lib",
                 @$ld,
                 "-o", "$exefile",
             );
         }
         warn "# @sys_cmd\n" if $args{debug};
-        local $ENV{LD_RUN_PATH} = join(":", grep $_, @libpaths, $ENV{LD_RUN_PATH}) unless $^O eq 'MSWin32';
+        local $ENV{LD_RUN_PATH} = join(":", grep $_, @libpaths, $ENV{LD_RUN_PATH}) unless $^O eq 'MSWin32' or $^O eq 'darwin';
         local $ENV{PATH} = join(";", @libpaths).";".$ENV{PATH} if $^O eq 'MSWin32';
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
         if ($rv != 0 || ! -f $exefile) {
