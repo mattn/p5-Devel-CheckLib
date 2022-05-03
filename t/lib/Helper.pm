@@ -43,7 +43,7 @@ sub create_testlib {
     print {$code_fh} "int libversion() { return 42; }\nint foo() { return 0; }\n";
     $code_fh->close;
 
-    my $cc = $Config{cc};
+    my $cc = (split(/\s+/, $Config{cc}))[0];
     my $gccv = $Config{gccversion};
     my $rv =
         $cc eq 'gcc'    ? _gcc_lib( $libname )  :
@@ -115,7 +115,14 @@ sub lib_to_bin {
 }
 
 sub find_compiler {
-    return find_binary($Config{cc});
+    my $result = find_binary($Config{cc});
+    return $result if($result);
+
+    # sometimes $Config{cc} isn't very clean eg it can be 'cc -q32' on AIX
+    return find_binary((split(/\s+/, $Config{cc}))[0])
+        if($Config{cc} =~ /\s/);
+
+    undef;
 }
 
 1; # must be true
