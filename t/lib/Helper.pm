@@ -62,20 +62,19 @@ sub _gcc_lib {
     my $ar = find_binary('ar') or return;
     my $ranlib = find_binary('ranlib') or return;
     my $ccflags = $Config{ccflags};
-
-    _quiet_system("$cc $ccflags -c ${libname}.c") and return;
-    _quiet_system("$ar rc lib${libname}.a ${libname}.o") and return;
-    _quiet_system("$ranlib lib${libname}.a") and return;
-    return -f "lib${libname}.a"
+    my $libfile = "lib${libname}.a";
+    _quiet_system(qq{"$cc" $ccflags -c ${libname}.c}) and return;
+    _quiet_system($ar, 'rc', $libfile, "${libname}$Config{_o}") and return;
+    _quiet_system($ranlib, $libfile) and return;
+    return -f $libfile
 }
 
 sub _cl_lib {
     my ($libname) = @_;
     my $cc = find_compiler() or return;
     my $ar = find_binary('lib') or return;
-
     _quiet_system($cc, '/c',  "${libname}.c") and return;
-    _quiet_system($ar, "${libname}.obj") and return;
+    _quiet_system($ar, "${libname}$Config{_o}") and return;
     return -f "${libname}.lib";
 }
 
