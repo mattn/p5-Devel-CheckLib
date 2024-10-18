@@ -2,10 +2,9 @@
 
 package Devel::CheckLib;
 
-use 5.00405; #postfix foreach
+use 5.006;
 use strict;
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.14';
+our $VERSION = '1.14';
 use Config qw(%Config);
 use Text::ParseWords qw(quotewords shellwords);
 
@@ -13,8 +12,8 @@ use File::Spec;
 use File::Temp;
 
 require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(assert_lib check_lib_or_exit check_lib);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(assert_lib check_lib_or_exit check_lib);
 
 # localising prevents the warningness leaking out of this module
 local $^W = 1;    # use warnings is a 5.6-ism
