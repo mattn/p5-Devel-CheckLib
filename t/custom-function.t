@@ -62,6 +62,14 @@ my %passcases = (
         header => 'headerfile.h',
         functionbody => 'foo();if(libversion() > 5) return 0; else return 1;'
     }, "function exists and other function returns right value",
+    qq{
+        incpath => 't/inc',
+        libpath => '$libdir',
+        lib => 'bazbam',
+        header => 'headerfile.h',
+        functionbody => 'bar(); return 0;',
+        prologue => 'void bar() { foo(); }'
+    }, "test prologue",
 );
 
 plan tests => scalar(keys %failcases) + scalar(keys %passcases);
