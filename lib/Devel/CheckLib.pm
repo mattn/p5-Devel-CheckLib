@@ -11,6 +11,7 @@ use Text::ParseWords qw(quotewords shellwords);
 
 use File::Spec;
 use File::Temp;
+use File::Path qw(rmtree);
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -437,6 +438,12 @@ sub _cleanup_exe {
     }
     foreach (grep -f, @rmfiles) {
 	unlink $_ or warn "Could not remove $_: $!";
+    }
+    if ($^O eq "darwin") {
+      # created by clang on darwin
+      my $dsym_dir = $exefile;
+      $dsym_dir =~ s/\Q$Config{_exe}\E$/.dSYM/;
+      rmtree $dsym_dir if -d $dsym_dir;
     }
     return
 }
